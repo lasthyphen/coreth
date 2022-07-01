@@ -15,9 +15,9 @@ import (
 	"github.com/lasthyphen/coreth/core/types"
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/beacongo/chains/atomic"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/snow/choices"
+	"github.com/lasthyphen/dijigo/chains/atomic"
+	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/dijigo/snow/choices"
 )
 
 var (

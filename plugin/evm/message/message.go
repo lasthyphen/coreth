@@ -7,12 +7,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/lasthyphen/beacongo/codec"
+	"github.com/lasthyphen/dijigo/codec"
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/utils/units"
+	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/dijigo/utils/units"
 )
 
 const (

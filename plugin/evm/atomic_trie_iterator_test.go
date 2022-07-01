@@ -6,12 +6,12 @@ package evm
 import (
 	"testing"
 
-	"github.com/lasthyphen/beacongo/chains/atomic"
-	"github.com/lasthyphen/beacongo/database/memdb"
-	"github.com/lasthyphen/beacongo/database/versiondb"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/utils"
-	"github.com/lasthyphen/beacongo/utils/logging"
+	"github.com/lasthyphen/dijigo/chains/atomic"
+	"github.com/lasthyphen/dijigo/database/memdb"
+	"github.com/lasthyphen/dijigo/database/versiondb"
+	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/dijigo/utils"
+	"github.com/lasthyphen/dijigo/utils/logging"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 )

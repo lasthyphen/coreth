@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lasthyphen/beacongo/api"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/utils/formatting"
-	cjson "github.com/lasthyphen/beacongo/utils/json"
-	"github.com/lasthyphen/beacongo/utils/rpc"
+	"github.com/lasthyphen/dijigo/api"
+	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/dijigo/utils/formatting"
+	cjson "github.com/lasthyphen/dijigo/utils/json"
+	"github.com/lasthyphen/dijigo/utils/rpc"
 	"github.com/ethereum/go-ethereum/log"
 )
 

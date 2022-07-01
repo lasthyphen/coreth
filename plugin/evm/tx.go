@@ -15,16 +15,16 @@ import (
 	"github.com/lasthyphen/coreth/core/state"
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/beacongo/chains/atomic"
-	"github.com/lasthyphen/beacongo/codec"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/snow"
-	"github.com/lasthyphen/beacongo/utils"
-	"github.com/lasthyphen/beacongo/utils/crypto"
-	"github.com/lasthyphen/beacongo/utils/hashing"
-	"github.com/lasthyphen/beacongo/utils/wrappers"
-	"github.com/lasthyphen/beacongo/vms/components/verify"
-	"github.com/lasthyphen/beacongo/vms/secp256k1fx"
+	"github.com/lasthyphen/dijigo/chains/atomic"
+	"github.com/lasthyphen/dijigo/codec"
+	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/dijigo/snow"
+	"github.com/lasthyphen/dijigo/utils"
+	"github.com/lasthyphen/dijigo/utils/crypto"
+	"github.com/lasthyphen/dijigo/utils/hashing"
+	"github.com/lasthyphen/dijigo/utils/wrappers"
+	"github.com/lasthyphen/dijigo/vms/components/verify"
+	"github.com/lasthyphen/dijigo/vms/secp256k1fx"
 )
 
 var (

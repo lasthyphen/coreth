@@ -11,7 +11,7 @@ import (
 
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/beacongo/snow"
+	"github.com/lasthyphen/dijigo/snow"
 )
 
 func TestBlockBuilderShutsDown(t *testing.T) {

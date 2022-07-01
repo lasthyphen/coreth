@@ -7,8 +7,8 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/lasthyphen/beacongo/utils"
-	"github.com/lasthyphen/beacongo/utils/units"
+	"github.com/lasthyphen/dijigo/utils"
+	"github.com/lasthyphen/dijigo/utils/units"
 
 	"github.com/stretchr/testify/assert"
 )

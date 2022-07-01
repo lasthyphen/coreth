@@ -12,11 +12,11 @@ import (
 
 	"golang.org/x/sync/semaphore"
 
-	"github.com/lasthyphen/beacongo/codec"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/snow/engine/common"
-	"github.com/lasthyphen/beacongo/snow/validators"
-	"github.com/lasthyphen/beacongo/version"
+	"github.com/lasthyphen/dijigo/codec"
+	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/dijigo/snow/engine/common"
+	"github.com/lasthyphen/dijigo/snow/validators"
+	"github.com/lasthyphen/dijigo/version"
 
 	"github.com/lasthyphen/coreth/plugin/evm/message"
 	"github.com/ethereum/go-ethereum/log"
