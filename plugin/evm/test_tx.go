@@ -7,14 +7,14 @@ import (
 	"math/big"
 	"math/rand"
 
-	"github.com/lasthyphen/dijigo/utils"
+	"github.com/lasthyphen/beacongo/utils"
 
-	"github.com/lasthyphen/dijigo/chains/atomic"
-	"github.com/lasthyphen/dijigo/codec"
-	"github.com/lasthyphen/dijigo/codec/linearcodec"
-	"github.com/lasthyphen/dijigo/ids"
-	"github.com/lasthyphen/dijigo/snow"
-	"github.com/lasthyphen/dijigo/utils/wrappers"
+	"github.com/lasthyphen/beacongo/chains/atomic"
+	"github.com/lasthyphen/beacongo/codec"
+	"github.com/lasthyphen/beacongo/codec/linearcodec"
+	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/beacongo/snow"
+	"github.com/lasthyphen/beacongo/utils/wrappers"
 	"github.com/lasthyphen/coreth/core/state"
 	"github.com/lasthyphen/coreth/params"
 )

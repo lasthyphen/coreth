@@ -6,7 +6,7 @@ package handlers
 import (
 	"context"
 
-	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/beacongo/ids"
 	"github.com/lasthyphen/coreth/plugin/evm/message"
 )
 

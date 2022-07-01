@@ -10,12 +10,12 @@ import (
 	"github.com/lasthyphen/coreth/params"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/lasthyphen/dijigo/chains/atomic"
-	"github.com/lasthyphen/dijigo/ids"
-	"github.com/lasthyphen/dijigo/utils/constants"
-	"github.com/lasthyphen/dijigo/utils/crypto"
-	"github.com/lasthyphen/dijigo/vms/components/djtx"
-	"github.com/lasthyphen/dijigo/vms/secp256k1fx"
+	"github.com/lasthyphen/beacongo/chains/atomic"
+	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/beacongo/utils/constants"
+	"github.com/lasthyphen/beacongo/utils/crypto"
+	"github.com/lasthyphen/beacongo/vms/components/djtx"
+	"github.com/lasthyphen/beacongo/vms/secp256k1fx"
 )
 
 // createImportTxOptions adds a UTXO to shared memory and generates a list of import transactions sending this UTXO

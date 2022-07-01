@@ -7,7 +7,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/lasthyphen/dijigo/utils/formatting"
+	"github.com/lasthyphen/beacongo/utils/formatting"
 	"github.com/lasthyphen/coreth/core"
 )
 
