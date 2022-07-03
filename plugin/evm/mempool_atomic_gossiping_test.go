@@ -8,11 +8,11 @@ import (
 
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/utils/crypto"
-	"github.com/lasthyphen/beacongo/vms/components/djtx"
-	"github.com/lasthyphen/beacongo/vms/components/chain"
-	"github.com/lasthyphen/beacongo/vms/secp256k1fx"
+	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/dijigo/utils/crypto"
+	"github.com/lasthyphen/dijigo/vms/components/djtx"
+	"github.com/lasthyphen/dijigo/vms/components/chain"
+	"github.com/lasthyphen/dijigo/vms/secp256k1fx"
 
 	"github.com/stretchr/testify/assert"
 )

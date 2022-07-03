@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijigo/ids"
 	"github.com/lasthyphen/coreth/ethdb/memorydb"
 	"github.com/lasthyphen/coreth/plugin/evm/message"
 	"github.com/lasthyphen/coreth/statesync/handlers/stats"

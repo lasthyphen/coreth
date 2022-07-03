@@ -4,10 +4,10 @@
 package message
 
 import (
-	"github.com/lasthyphen/beacongo/codec"
-	"github.com/lasthyphen/beacongo/codec/linearcodec"
-	"github.com/lasthyphen/beacongo/utils/units"
-	"github.com/lasthyphen/beacongo/utils/wrappers"
+	"github.com/lasthyphen/dijigo/codec"
+	"github.com/lasthyphen/dijigo/codec/linearcodec"
+	"github.com/lasthyphen/dijigo/utils/units"
+	"github.com/lasthyphen/dijigo/utils/wrappers"
 )
 
 const Version = uint16(0)

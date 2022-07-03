@@ -7,10 +7,10 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/lasthyphen/beacongo/chains/atomic"
-	"github.com/lasthyphen/beacongo/codec"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/utils/wrappers"
+	"github.com/lasthyphen/dijigo/chains/atomic"
+	"github.com/lasthyphen/dijigo/codec"
+	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/dijigo/utils/wrappers"
 
 	"github.com/lasthyphen/coreth/trie"
 	"github.com/ethereum/go-ethereum/common"

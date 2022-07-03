@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijigo/ids"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"

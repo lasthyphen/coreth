@@ -9,8 +9,8 @@ import (
 
 	"github.com/hashicorp/go-plugin"
 
-	"github.com/lasthyphen/beacongo/utils/ulimit"
-	"github.com/lasthyphen/beacongo/vms/rpcchainvm"
+	"github.com/lasthyphen/dijigo/utils/ulimit"
+	"github.com/lasthyphen/dijigo/vms/rpcchainvm"
 
 	"github.com/lasthyphen/coreth/plugin/evm"
 )

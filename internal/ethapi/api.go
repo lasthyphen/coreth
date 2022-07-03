@@ -34,7 +34,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijigo/ids"
 	"github.com/lasthyphen/coreth/accounts"
 	"github.com/lasthyphen/coreth/accounts/keystore"
 	"github.com/lasthyphen/coreth/accounts/scwallet"

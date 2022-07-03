@@ -6,7 +6,7 @@ package evm
 import (
 	"container/heap"
 
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijigo/ids"
 )
 
 // txEntry is used to track the [gasPrice] transactions pay to be included in

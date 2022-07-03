@@ -33,7 +33,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lasthyphen/beacongo/utils/timer/mockable"
+	"github.com/lasthyphen/dijigo/utils/timer/mockable"
 	"github.com/lasthyphen/coreth/accounts"
 	"github.com/lasthyphen/coreth/consensus"
 	"github.com/lasthyphen/coreth/consensus/dummy"

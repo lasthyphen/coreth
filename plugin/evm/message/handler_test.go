@@ -6,7 +6,7 @@ package message
 import (
 	"testing"
 
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijigo/ids"
 
 	"github.com/stretchr/testify/assert"
 )

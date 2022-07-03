@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijigo/ids"
 
 	"github.com/stretchr/testify/assert"
 

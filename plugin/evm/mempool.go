@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/lasthyphen/beacongo/cache"
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijigo/cache"
+	"github.com/lasthyphen/dijigo/ids"
 	"github.com/ethereum/go-ethereum/log"
 )
 

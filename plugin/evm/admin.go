@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/lasthyphen/beacongo/api"
-	"github.com/lasthyphen/beacongo/utils/profiler"
+	"github.com/lasthyphen/dijigo/api"
+	"github.com/lasthyphen/dijigo/utils/profiler"
 	"github.com/ethereum/go-ethereum/log"
 )
 

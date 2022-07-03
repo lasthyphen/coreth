@@ -9,14 +9,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lasthyphen/beacongo/codec"
+	"github.com/lasthyphen/dijigo/codec"
 
 	"github.com/lasthyphen/coreth/peer"
 
-	"github.com/lasthyphen/beacongo/cache"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/snow"
-	"github.com/lasthyphen/beacongo/utils/wrappers"
+	"github.com/lasthyphen/dijigo/cache"
+	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/dijigo/snow"
+	"github.com/lasthyphen/dijigo/utils/wrappers"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
