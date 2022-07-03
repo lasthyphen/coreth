@@ -11,9 +11,9 @@ import (
 	coreth "github.com/lasthyphen/coreth/chain"
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/dijigo/snow"
-	commonEng "github.com/lasthyphen/dijigo/snow/engine/common"
-	"github.com/lasthyphen/dijigo/utils/timer"
+	"github.com/lasthyphen/beacongo/snow"
+	commonEng "github.com/lasthyphen/beacongo/snow/engine/common"
+	"github.com/lasthyphen/beacongo/utils/timer"
 	"github.com/ethereum/go-ethereum/log"
 )
 

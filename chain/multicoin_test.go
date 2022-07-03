@@ -28,7 +28,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lasthyphen/dijigo/utils/timer/mockable"
+	"github.com/lasthyphen/beacongo/utils/timer/mockable"
 	"github.com/lasthyphen/coreth/accounts/keystore"
 	"github.com/lasthyphen/coreth/consensus/dummy"
 	"github.com/lasthyphen/coreth/core"

@@ -4,9 +4,9 @@
 package evm
 
 import (
-	"github.com/lasthyphen/dijigo/ids"
-	"github.com/lasthyphen/dijigo/snow"
-	"github.com/lasthyphen/dijigo/vms"
+	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/beacongo/snow"
+	"github.com/lasthyphen/beacongo/vms"
 )
 
 var (

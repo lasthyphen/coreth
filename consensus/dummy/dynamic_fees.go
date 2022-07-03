@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/lasthyphen/dijigo/utils/wrappers"
+	"github.com/lasthyphen/beacongo/utils/wrappers"
 	"github.com/lasthyphen/coreth/core/types"
 	"github.com/lasthyphen/coreth/params"
 	"github.com/ethereum/go-ethereum/common"

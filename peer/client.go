@@ -6,9 +6,9 @@ package peer
 import (
 	"errors"
 
-	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/beacongo/ids"
 
-	"github.com/lasthyphen/dijigo/version"
+	"github.com/lasthyphen/beacongo/version"
 )
 
 var (

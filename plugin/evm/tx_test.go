@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lasthyphen/dijigo/chains/atomic"
-	"github.com/lasthyphen/dijigo/snow"
+	"github.com/lasthyphen/beacongo/chains/atomic"
+	"github.com/lasthyphen/beacongo/snow"
 	"github.com/lasthyphen/coreth/params"
 )
 

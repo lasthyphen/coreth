@@ -12,14 +12,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lasthyphen/dijigo/snow/engine/common"
+	"github.com/lasthyphen/beacongo/snow/engine/common"
 
 	"github.com/lasthyphen/coreth/plugin/evm/message"
 
-	"github.com/lasthyphen/dijigo/codec"
-	"github.com/lasthyphen/dijigo/codec/linearcodec"
-	"github.com/lasthyphen/dijigo/ids"
-	"github.com/lasthyphen/dijigo/version"
+	"github.com/lasthyphen/beacongo/codec"
+	"github.com/lasthyphen/beacongo/codec/linearcodec"
+	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/beacongo/version"
 	"github.com/stretchr/testify/assert"
 )
 

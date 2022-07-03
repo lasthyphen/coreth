@@ -9,19 +9,19 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/lasthyphen/dijigo/chains/atomic"
-	"github.com/lasthyphen/dijigo/database"
-	"github.com/lasthyphen/dijigo/database/prefixdb"
-	"github.com/lasthyphen/dijigo/database/versiondb"
+	"github.com/lasthyphen/beacongo/chains/atomic"
+	"github.com/lasthyphen/beacongo/database"
+	"github.com/lasthyphen/beacongo/database/prefixdb"
+	"github.com/lasthyphen/beacongo/database/versiondb"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/lasthyphen/dijigo/codec"
-	"github.com/lasthyphen/dijigo/utils/wrappers"
+	"github.com/lasthyphen/beacongo/codec"
+	"github.com/lasthyphen/beacongo/utils/wrappers"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/lasthyphen/dijigo/database/memdb"
-	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/beacongo/database/memdb"
+	"github.com/lasthyphen/beacongo/ids"
 )
 
 // addTxs writes [txsPerHeight] txs for heights ranging in [fromHeight, toHeight) directly to [acceptedAtomicTxDB],

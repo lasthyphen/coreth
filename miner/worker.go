@@ -36,7 +36,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lasthyphen/dijigo/utils/timer/mockable"
+	"github.com/lasthyphen/beacongo/utils/timer/mockable"
 	"github.com/lasthyphen/coreth/consensus"
 	"github.com/lasthyphen/coreth/consensus/dummy"
 	"github.com/lasthyphen/coreth/consensus/misc"
