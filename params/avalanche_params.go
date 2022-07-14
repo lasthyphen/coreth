@@ -6,7 +6,7 @@ package params
 import (
 	"math/big"
 
-	"github.com/lasthyphen/dijigo/utils/units"
+	"github.com/lasthyphen/beacongo/utils/units"
 )
 
 // Minimum Gas Price

@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lasthyphen/dijigo/codec"
-	"github.com/lasthyphen/dijigo/ids"
+	"github.com/lasthyphen/beacongo/codec"
+	"github.com/lasthyphen/beacongo/ids"
 )
 
 // Request represents a Network request type
