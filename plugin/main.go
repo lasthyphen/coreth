@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lasthyphen/beacongo/utils/logging"
+	"github.com/hashicorp/go-plugin"
+
 	"github.com/lasthyphen/beacongo/utils/ulimit"
 	"github.com/lasthyphen/beacongo/vms/rpcchainvm"
 
@@ -24,10 +25,17 @@ func main() {
 		fmt.Println(evm.Version)
 		os.Exit(0)
 	}
-	if err := ulimit.Set(ulimit.DefaultFDLimit, logging.NoLog{}); err != nil {
+	if err := ulimit.Set(ulimit.DefaultFDLimit); err != nil {
 		fmt.Printf("failed to set fd limit correctly due to: %s", err)
 		os.Exit(1)
 	}
+	plugin.Serve(&plugin.ServeConfig{
+		HandshakeConfig: rpcchainvm.Handshake,
+		Plugins: map[string]plugin.Plugin{
+			"vm": rpcchainvm.New(&evm.VM{}),
+		},
 
-	rpcchainvm.Serve(&evm.VM{IsPlugin: true})
+		// A non-nil value here enables gRPC serving for this plugin...
+		GRPCServer: plugin.DefaultGRPCServer,
+	})
 }

@@ -39,19 +39,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
-func TestEmptyIterator(t *testing.T) {
-	trie := newEmpty()
-	iter := trie.NodeIterator(nil)
-
-	seen := make(map[string]struct{})
-	for iter.Next(true) {
-		seen[string(iter.Path())] = struct{}{}
-	}
-	if len(seen) != 0 {
-		t.Fatal("Unexpected trie node iterated")
-	}
-}
-
 func TestIterator(t *testing.T) {
 	trie := newEmpty()
 	vals := []struct{ k, v string }{
@@ -135,7 +122,7 @@ func TestNodeIteratorCoverage(t *testing.T) {
 	}
 	// Cross check the hashes and the database itself
 	for hash := range hashes {
-		if _, err := db.RawNode(hash); err != nil {
+		if _, err := db.Node(hash); err != nil {
 			t.Errorf("failed to retrieve reported node %x: %v", hash, err)
 		}
 	}

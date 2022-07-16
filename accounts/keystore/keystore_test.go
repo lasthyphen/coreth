@@ -293,7 +293,6 @@ type walletEvent struct {
 // Tests that wallet notifications and correctly fired when accounts are added
 // or deleted from the keystore.
 func TestWalletNotifications(t *testing.T) {
-	t.Skip("FLAKY")
 	dir, ks := tmpKeyStore(t, false)
 	defer os.RemoveAll(dir)
 

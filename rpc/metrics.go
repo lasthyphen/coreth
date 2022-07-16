@@ -29,13 +29,13 @@ package rpc
 import (
 	"fmt"
 
-	"github.com/lasthyphen/coreth/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 )
 
 var (
 	rpcRequestGauge        = metrics.NewRegisteredGauge("rpc/requests", nil)
 	successfulRequestGauge = metrics.NewRegisteredGauge("rpc/success", nil)
-	failedRequestGauge     = metrics.NewRegisteredGauge("rpc/failure", nil)
+	failedReqeustGauge     = metrics.NewRegisteredGauge("rpc/failure", nil)
 	rpcServingTimer        = metrics.NewRegisteredTimer("rpc/duration/all", nil)
 )
 

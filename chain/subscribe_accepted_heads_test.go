@@ -94,7 +94,6 @@ func TestAcceptedHeadSubscriptions(t *testing.T) {
 	if err := chain.Accept(block); err != nil {
 		t.Fatal(err)
 	}
-	chain.BlockChain().DrainAcceptorQueue()
 
 	select {
 	case fb := <-acceptedChainCh:

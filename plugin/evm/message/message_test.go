@@ -23,11 +23,13 @@ func TestMarshalAtomicTx(t *testing.T) {
 	builtMsg := AtomicTxGossip{
 		Tx: msg,
 	}
-	builtMsgBytes, err := BuildGossipMessage(Codec, builtMsg)
+	codec, err := BuildCodec()
+	assert.NoError(err)
+	builtMsgBytes, err := BuildGossipMessage(codec, builtMsg)
 	assert.NoError(err)
 	assert.Equal(base64AtomicTxGossip, base64.StdEncoding.EncodeToString(builtMsgBytes))
 
-	parsedMsgIntf, err := ParseGossipMessage(Codec, builtMsgBytes)
+	parsedMsgIntf, err := ParseGossipMessage(codec, builtMsgBytes)
 	assert.NoError(err)
 
 	parsedMsg, ok := parsedMsgIntf.(AtomicTxGossip)
@@ -46,11 +48,13 @@ func TestMarshalEthTxs(t *testing.T) {
 	builtMsg := EthTxsGossip{
 		Txs: msg,
 	}
-	builtMsgBytes, err := BuildGossipMessage(Codec, builtMsg)
+	codec, err := BuildCodec()
+	assert.NoError(err)
+	builtMsgBytes, err := BuildGossipMessage(codec, builtMsg)
 	assert.NoError(err)
 	assert.Equal(base64EthTxGossip, base64.StdEncoding.EncodeToString(builtMsgBytes))
 
-	parsedMsgIntf, err := ParseGossipMessage(Codec, builtMsgBytes)
+	parsedMsgIntf, err := ParseGossipMessage(codec, builtMsgBytes)
 	assert.NoError(err)
 
 	parsedMsg, ok := parsedMsgIntf.(EthTxsGossip)
@@ -65,14 +69,18 @@ func TestEthTxsTooLarge(t *testing.T) {
 	builtMsg := EthTxsGossip{
 		Txs: utils.RandomBytes(1024 * units.KiB),
 	}
-	_, err := BuildGossipMessage(Codec, builtMsg)
+	codec, err := BuildCodec()
+	assert.NoError(err)
+	_, err = BuildGossipMessage(codec, builtMsg)
 	assert.Error(err)
 }
 
 func TestParseGibberish(t *testing.T) {
 	assert := assert.New(t)
 
+	codec, err := BuildCodec()
+	assert.NoError(err)
 	randomBytes := utils.RandomBytes(256 * units.KiB)
-	_, err := ParseGossipMessage(Codec, randomBytes)
+	_, err = ParseGossipMessage(codec, randomBytes)
 	assert.Error(err)
 }

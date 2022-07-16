@@ -55,9 +55,8 @@ type BlockGen struct {
 	receipts []*types.Receipt
 	uncles   []*types.Header
 
-	config           *params.ChainConfig
-	engine           consensus.Engine
-	onBlockGenerated func(*types.Block)
+	config *params.ChainConfig
+	engine consensus.Engine
 }
 
 // SetCoinbase sets the coinbase of the generated block.
@@ -195,11 +194,6 @@ func (b *BlockGen) OffsetTime(seconds int64) {
 	b.header.Difficulty = b.engine.CalcDifficulty(chainreader, b.header.Time, b.parent.Header())
 }
 
-// SetOnBlockGenerated sets a callback function to be invoked after each block is generated
-func (b *BlockGen) SetOnBlockGenerated(onBlockGenerated func(*types.Block)) {
-	b.onBlockGenerated = onBlockGenerated
-}
-
 // GenerateChain creates a chain of n blocks. The first block's
 // parent will be the provided parent. db is used to store
 // intermediate states and should contain the parent's state trie.
@@ -256,9 +250,6 @@ func GenerateChain(config *params.ChainConfig, parent *types.Block, engine conse
 			}
 			if err := statedb.Database().TrieDB().Commit(root, false, nil); err != nil {
 				panic(fmt.Sprintf("trie write error: %v", err))
-			}
-			if b.onBlockGenerated != nil {
-				b.onBlockGenerated(block)
 			}
 			return block, b.receipts, nil
 		}

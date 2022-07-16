@@ -35,9 +35,9 @@ import (
 	"time"
 
 	"github.com/lasthyphen/coreth/core/types"
-	"github.com/lasthyphen/coreth/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 

@@ -104,7 +104,6 @@ func newTestBackend(t *testing.T, n int, gspec *core.Genesis, generator func(i i
 		}
 	}
 	backend.chain = chain
-	chain.DrainAcceptorQueue()
 	return backend
 }
 
