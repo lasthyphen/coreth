@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Dijets, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -130,4 +130,10 @@ func loadSnapshot(diskdb ethdb.KeyValueStore, triedb *trie.Database, cache int, 
 	}
 
 	return snapshot, generator.Done, nil
+}
+
+// ResetSnapshotGeneration writes a clean snapshot generator marker to [db]
+// so no re-generation is performed after.
+func ResetSnapshotGeneration(db ethdb.KeyValueWriter) {
+	journalProgress(db, nil, nil)
 }

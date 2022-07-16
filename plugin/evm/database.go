@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2020, Dijets, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -7,6 +7,8 @@ import (
 	"github.com/lasthyphen/beacongo/database"
 	"github.com/lasthyphen/coreth/ethdb"
 )
+
+var _ ethdb.Database = &Database{}
 
 // Database implements ethdb.Database
 type Database struct{ database.Database }

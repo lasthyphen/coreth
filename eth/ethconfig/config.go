@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Dijets, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -82,11 +82,14 @@ type Config struct {
 	// for nodes to connect to.
 	DiscoveryURLs []string
 
-	Pruning              bool    // Whether to disable pruning and flush everything to disk
-	PopulateMissingTries *uint64 // Height at which to start re-populating missing tries on startup.
-	AllowMissingTries    bool    // Whether to allow an archival node to run with pruning enabled and corrupt a complete index.
-	SnapshotAsync        bool    // Whether to generate the initial snapshot in async mode
-	SnapshotVerify       bool    // Whether to verify generated snapshots
+	Pruning                         bool    // Whether to disable pruning and flush everything to disk
+	CommitInterval                  uint64  // If pruning is enabled, specified the interval at which to commit an entire trie to disk.
+	PopulateMissingTries            *uint64 // Height at which to start re-populating missing tries on startup.
+	PopulateMissingTriesParallelism int     // Number of concurrent readers to use when re-populating missing tries on startup.
+	AllowMissingTries               bool    // Whether to allow an archival node to run with pruning enabled and corrupt a complete index.
+	SnapshotDelayInit               bool    // Whether snapshot tree should be initialized on startup or delayed until explicit call
+	SnapshotAsync                   bool    // Whether to generate the initial snapshot in async mode
+	SnapshotVerify                  bool    // Whether to verify generated snapshots
 
 	// Whitelist of required block number -> hash values to accept
 	Whitelist map[uint64]common.Hash `toml:"-"`

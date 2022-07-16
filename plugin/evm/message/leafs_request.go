@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2022, Dijets, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -50,12 +50,12 @@ type LeafsRequest struct {
 
 func (l LeafsRequest) String() string {
 	return fmt.Sprintf(
-		"LeafsRequest(Root=%s, Start=%s, End %s, Limit=%d, NodeType=%s)",
+		"LeafsRequest(Root=%s, Start=%s, End=%s, Limit=%d, NodeType=%s)",
 		l.Root, common.Bytes2Hex(l.Start), common.Bytes2Hex(l.End), l.Limit, l.NodeType,
 	)
 }
 
-func (l LeafsRequest) Handle(ctx context.Context, nodeID ids.ShortID, requestID uint32, handler RequestHandler) ([]byte, error) {
+func (l LeafsRequest) Handle(ctx context.Context, nodeID ids.NodeID, requestID uint32, handler RequestHandler) ([]byte, error) {
 	switch l.NodeType {
 	case StateTrieNode:
 		return handler.HandleStateTrieLeafsRequest(ctx, nodeID, requestID, l)

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2020, Dijets, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -147,7 +147,7 @@ func (b *Block) Accept() error {
 	}
 	for _, tx := range b.atomicTxs {
 		// Remove the accepted transaction from the mempool
-		vm.mempool.RemoveTx(tx.ID())
+		vm.mempool.RemoveTx(tx)
 	}
 
 	isBonus := bonusBlocks.Contains(b.id)
@@ -189,7 +189,7 @@ func (b *Block) Reject() error {
 	b.status = choices.Rejected
 	log.Debug(fmt.Sprintf("Rejecting block %s (%s) at height %d", b.ID().Hex(), b.ID(), b.Height()))
 	for _, tx := range b.atomicTxs {
-		b.vm.mempool.RemoveTx(tx.ID())
+		b.vm.mempool.RemoveTx(tx)
 		if err := b.vm.issueTx(tx, false /* set local to false when re-issuing */); err != nil {
 			log.Debug("Failed to re-issue transaction in rejected block", "txID", tx.ID(), "err", err)
 		}

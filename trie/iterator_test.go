@@ -1,4 +1,4 @@
-// (c) 2020-2021, Ava Labs, Inc.
+// (c) 2020-2021, Dijets, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -38,6 +38,19 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )
+
+func TestEmptyIterator(t *testing.T) {
+	trie := newEmpty()
+	iter := trie.NodeIterator(nil)
+
+	seen := make(map[string]struct{})
+	for iter.Next(true) {
+		seen[string(iter.Path())] = struct{}{}
+	}
+	if len(seen) != 0 {
+		t.Fatal("Unexpected trie node iterated")
+	}
+}
 
 func TestIterator(t *testing.T) {
 	trie := newEmpty()

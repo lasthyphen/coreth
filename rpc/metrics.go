@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Dijets, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,13 +29,13 @@ package rpc
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/lasthyphen/coreth/metrics"
 )
 
 var (
 	rpcRequestGauge        = metrics.NewRegisteredGauge("rpc/requests", nil)
 	successfulRequestGauge = metrics.NewRegisteredGauge("rpc/success", nil)
-	failedReqeustGauge     = metrics.NewRegisteredGauge("rpc/failure", nil)
+	failedRequestGauge     = metrics.NewRegisteredGauge("rpc/failure", nil)
 	rpcServingTimer        = metrics.NewRegisteredTimer("rpc/duration/all", nil)
 )
 

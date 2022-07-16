@@ -1,4 +1,4 @@
-// (c) 2019-2021, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2021, Dijets, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -52,7 +52,7 @@ type pushGossiper struct {
 	gossipActivationTime time.Time
 	config               Config
 
-	client        peer.Client
+	client        peer.NetworkClient
 	blockchain    *core.BlockChain
 	txPool        *core.TxPool
 	atomicMempool *Mempool
@@ -73,9 +73,13 @@ type pushGossiper struct {
 	codec codec.Manager
 }
 
-// newPushGossiper constructs and returns a pushGossiper
-// assumes vm.chainConfig.ApricotPhase4BlockTimestamp is set
-func (vm *VM) newPushGossiper() Gossiper {
+// createGossiper constructs and returns a pushGossiper or noopGossiper
+// based on whether vm.chainConfig.ApricotPhase4BlockTimestamp is set
+func (vm *VM) createGossiper() Gossiper {
+	if vm.chainConfig.ApricotPhase4BlockTimestamp == nil {
+		return &noopGossiper{}
+	}
+
 	net := &pushGossiper{
 		ctx:                  vm.ctx,
 		gossipActivationTime: time.Unix(vm.chainConfig.ApricotPhase4BlockTimestamp.Int64(), 0),
@@ -417,7 +421,7 @@ func NewGossipHandler(vm *VM) *GossipHandler {
 	}
 }
 
-func (h *GossipHandler) HandleAtomicTx(nodeID ids.ShortID, msg message.AtomicTxGossip) error {
+func (h *GossipHandler) HandleAtomicTx(nodeID ids.NodeID, msg message.AtomicTxGossip) error {
 	log.Trace(
 		"AppGossip called with AtomicTxGossip",
 		"peerID", nodeID,
@@ -467,7 +471,7 @@ func (h *GossipHandler) HandleAtomicTx(nodeID ids.ShortID, msg message.AtomicTxG
 	return nil
 }
 
-func (h *GossipHandler) HandleEthTxs(nodeID ids.ShortID, msg message.EthTxsGossip) error {
+func (h *GossipHandler) HandleEthTxs(nodeID ids.NodeID, msg message.EthTxsGossip) error {
 	log.Trace(
 		"AppGossip called with EthTxsGossip",
 		"peerID", nodeID,

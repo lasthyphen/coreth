@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2020, Dijets, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -42,6 +42,19 @@ func TestUnmarshalConfig(t *testing.T) {
 			[]byte(`{"api-max-duration": "bad-duration"}`),
 			Config{},
 			true,
+		},
+
+		{
+			"state sync enabled",
+			[]byte(`{"state-sync-enabled":true}`),
+			Config{StateSyncEnabled: true},
+			false,
+		},
+		{
+			"state sync sources",
+			[]byte(`{"state-sync-ids": "NodeID-CaBYJ9kzHvrQFiYWowMkJGAQKGMJqZoat"}`),
+			Config{StateSyncIDs: "NodeID-CaBYJ9kzHvrQFiYWowMkJGAQKGMJqZoat"},
+			false,
 		},
 	}
 

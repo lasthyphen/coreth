@@ -1,4 +1,4 @@
-// (c) 2019-2021, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2021, Dijets, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -88,10 +88,10 @@ func TestMempoolEthTxsAddedTxsGossipedAfterActivation(t *testing.T) {
 
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 
-	cfgJson, err := fundAddressByGenesis([]common.Address{addr})
+	genesisJSON, err := fundAddressByGenesis([]common.Address{addr})
 	assert.NoError(err)
 
-	_, vm, _, _, sender := GenesisVM(t, true, cfgJson, "", "")
+	_, vm, _, _, sender := GenesisVM(t, true, genesisJSON, "", "")
 	defer func() {
 		err := vm.Shutdown()
 		assert.NoError(err)
@@ -174,10 +174,10 @@ func TestMempoolEthTxsAddedTxsGossipedAfterActivationChunking(t *testing.T) {
 
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 
-	cfgJson, err := fundAddressByGenesis([]common.Address{addr})
+	genesisJSON, err := fundAddressByGenesis([]common.Address{addr})
 	assert.NoError(err)
 
-	_, vm, _, _, sender := GenesisVM(t, true, cfgJson, "", "")
+	_, vm, _, _, sender := GenesisVM(t, true, genesisJSON, "", "")
 	defer func() {
 		err := vm.Shutdown()
 		assert.NoError(err)
@@ -234,10 +234,10 @@ func TestMempoolEthTxsAppGossipHandling(t *testing.T) {
 
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 
-	cfgJson, err := fundAddressByGenesis([]common.Address{addr})
+	genesisJSON, err := fundAddressByGenesis([]common.Address{addr})
 	assert.NoError(err)
 
-	_, vm, _, _, sender := GenesisVM(t, true, cfgJson, "", "")
+	_, vm, _, _, sender := GenesisVM(t, true, genesisJSON, "", "")
 	defer func() {
 		err := vm.Shutdown()
 		assert.NoError(err)
@@ -250,7 +250,7 @@ func TestMempoolEthTxsAppGossipHandling(t *testing.T) {
 		txRequested bool
 	)
 	sender.CantSendAppGossip = false
-	sender.SendAppRequestF = func(_ ids.ShortSet, _ uint32, _ []byte) error {
+	sender.SendAppRequestF = func(_ ids.NodeIDSet, _ uint32, _ []byte) error {
 		txRequested = true
 		return nil
 	}
@@ -272,7 +272,7 @@ func TestMempoolEthTxsAppGossipHandling(t *testing.T) {
 	msgBytes, err := message.BuildGossipMessage(vm.networkCodec, msg)
 	assert.NoError(err)
 
-	nodeID := ids.GenerateTestShortID()
+	nodeID := ids.GenerateTestNodeID()
 	err = vm.AppGossip(nodeID, msgBytes)
 	assert.NoError(err)
 	assert.False(txRequested, "tx should not be requested")
@@ -289,10 +289,10 @@ func TestMempoolEthTxsRegossipSingleAccount(t *testing.T) {
 
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 
-	cfgJson, err := fundAddressByGenesis([]common.Address{addr})
+	genesisJSON, err := fundAddressByGenesis([]common.Address{addr})
 	assert.NoError(err)
 
-	_, vm, _, _, _ := GenesisVM(t, true, cfgJson, `{"local-txs-enabled":true}`, "")
+	_, vm, _, _, _ := GenesisVM(t, true, genesisJSON, `{"local-txs-enabled":true}`, "")
 	defer func() {
 		err := vm.Shutdown()
 		assert.NoError(err)
@@ -329,10 +329,10 @@ func TestMempoolEthTxsRegossip(t *testing.T) {
 		addrs[i] = crypto.PubkeyToAddress(key.PublicKey)
 	}
 
-	cfgJson, err := fundAddressByGenesis(addrs)
+	genesisJSON, err := fundAddressByGenesis(addrs)
 	assert.NoError(err)
 
-	_, vm, _, _, _ := GenesisVM(t, true, cfgJson, `{"local-txs-enabled":true}`, "")
+	_, vm, _, _, _ := GenesisVM(t, true, genesisJSON, `{"local-txs-enabled":true}`, "")
 	defer func() {
 		err := vm.Shutdown()
 		assert.NoError(err)

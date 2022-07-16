@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc.
+// (c) 2021-2022, Dijets, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -38,9 +38,9 @@ import (
 	"time"
 
 	"github.com/lasthyphen/coreth/ethdb"
+	"github.com/lasthyphen/coreth/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/filter"

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Dijets, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -151,13 +151,5 @@ func ReadSnapshotGenerator(db ethdb.KeyValueReader) []byte {
 func WriteSnapshotGenerator(db ethdb.KeyValueWriter, generator []byte) {
 	if err := db.Put(snapshotGeneratorKey, generator); err != nil {
 		log.Crit("Failed to store snapshot generator", "err", err)
-	}
-}
-
-// DeleteSnapshotGenerator deletes the serialized snapshot generator saved at
-// the last shutdown
-func DeleteSnapshotGenerator(db ethdb.KeyValueWriter) {
-	if err := db.Delete(snapshotGeneratorKey); err != nil {
-		log.Crit("Failed to remove snapshot generator", "err", err)
 	}
 }

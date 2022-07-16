@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Dijets, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -35,8 +35,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/lasthyphen/coreth/metrics"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
 	"golang.org/x/time/rate"
 )
 
@@ -439,7 +439,7 @@ func (h *handler) handleCall(cp *callProc, msg *jsonrpcMessage) *jsonrpcMessage 
 	if callb != h.unsubscribeCb {
 		rpcRequestGauge.Inc(1)
 		if answer.Error != nil {
-			failedReqeustGauge.Inc(1)
+			failedRequestGauge.Inc(1)
 		} else {
 			successfulRequestGauge.Inc(1)
 		}

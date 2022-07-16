@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Dijets, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -38,11 +38,11 @@ import (
 // Avalanche ChainIDs
 var (
 	// AvalancheMainnetChainID ...
-	AvalancheMainnetChainID = big.NewInt(43112)
+	AvalancheMainnetChainID = big.NewInt(98200)
 	// AvalancheFujiChainID ...
 	AvalancheFujiChainID = big.NewInt(43113)
 	// AvalancheLocalChainID ...
-	AvalancheLocalChainID = big.NewInt(43116)
+	AvalancheLocalChainID = big.NewInt(43112)
 
 	errNonGenesisForkByHeight = errors.New("coreth only supports forking by height at the genesis block")
 )

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Dijets, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -198,15 +198,18 @@ func New(
 			AllowUnfinalizedQueries: config.AllowUnfinalizedQueries,
 		}
 		cacheConfig = &core.CacheConfig{
-			TrieCleanLimit:       config.TrieCleanCache,
-			TrieDirtyLimit:       config.TrieDirtyCache,
-			Pruning:              config.Pruning,
-			PopulateMissingTries: config.PopulateMissingTries,
-			AllowMissingTries:    config.AllowMissingTries,
-			SnapshotLimit:        config.SnapshotCache,
-			SnapshotAsync:        config.SnapshotAsync,
-			SnapshotVerify:       config.SnapshotVerify,
-			Preimages:            config.Preimages,
+			TrieCleanLimit:                  config.TrieCleanCache,
+			TrieDirtyLimit:                  config.TrieDirtyCache,
+			Pruning:                         config.Pruning,
+			CommitInterval:                  config.CommitInterval,
+			PopulateMissingTries:            config.PopulateMissingTries,
+			PopulateMissingTriesParallelism: config.PopulateMissingTriesParallelism,
+			AllowMissingTries:               config.AllowMissingTries,
+			SnapshotDelayInit:               config.SnapshotDelayInit,
+			SnapshotLimit:                   config.SnapshotCache,
+			SnapshotAsync:                   config.SnapshotAsync,
+			SnapshotVerify:                  config.SnapshotVerify,
+			Preimages:                       config.Preimages,
 		}
 	)
 
