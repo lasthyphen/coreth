@@ -1,4 +1,4 @@
-// (c) 2019-2020, Dijets, Inc.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -910,6 +910,21 @@ func (t *Tree) DiskRoot() common.Hash {
 	defer t.lock.Unlock()
 
 	return t.diskRoot()
+}
+
+func (t *Tree) DiskAccountIterator(seek common.Hash) AccountIterator {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	return t.disklayer().AccountIterator(seek)
+}
+
+func (t *Tree) DiskStorageIterator(account common.Hash, seek common.Hash) StorageIterator {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	it, _ := t.disklayer().StorageIterator(account, seek)
+	return it
 }
 
 // NewTestTree creates a *Tree with a pre-populated diskLayer

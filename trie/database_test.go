@@ -1,4 +1,4 @@
-// (c) 2020-2021, Dijets, Inc.
+// (c) 2020-2021, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -37,7 +37,7 @@ import (
 // to retrieve the meta root.
 func TestDatabaseMetarootFetch(t *testing.T) {
 	db := NewDatabase(memorydb.New())
-	if _, err := db.Node(common.Hash{}); err == nil {
+	if _, err := db.RawNode(common.Hash{}); err == nil {
 		t.Fatalf("metaroot retrieval succeeded")
 	}
 }

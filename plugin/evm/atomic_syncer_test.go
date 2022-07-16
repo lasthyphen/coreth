@@ -1,4 +1,4 @@
-// (c) 2019-2020, Dijets, Inc. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -41,7 +41,7 @@ func testAtomicSyncer(t *testing.T, serverTrieDB *trie.Database, targetHeight ui
 	numLeaves := 0
 	mockClient := syncclient.NewMockClient(
 		message.Codec,
-		handlers.NewLeafsRequestHandler(serverTrieDB, message.Codec, handlerstats.NewNoopHandlerStats()),
+		handlers.NewLeafsRequestHandler(serverTrieDB, nil, message.Codec, handlerstats.NewNoopHandlerStats()),
 		nil,
 		nil,
 	)

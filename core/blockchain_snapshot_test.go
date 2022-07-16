@@ -1,4 +1,4 @@
-// (c) 2019-2021, Dijets, Inc.
+// (c) 2019-2021, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -116,6 +116,7 @@ func (basic *snapshotTestBasic) prepare(t *testing.T) (*BlockChain, []*types.Blo
 				}
 				basic.lastAcceptedHash = blocks[i].Hash()
 			}
+			chain.DrainAcceptorQueue()
 
 			diskRoot, blockRoot := chain.snaps.DiskRoot(), blocks[point-1].Root()
 			if !bytes.Equal(diskRoot.Bytes(), blockRoot.Bytes()) {
@@ -300,6 +301,8 @@ func (snaptest *gappedSnapshotTest) test(t *testing.T) {
 		TrieCleanLimit: 256,
 		TrieDirtyLimit: 256,
 		SnapshotLimit:  0,
+		Pruning:        true,
+		CommitInterval: 4096,
 	}
 	newchain, err := NewBlockChain(snaptest.db, cacheConfig, params.TestChainConfig, snaptest.engine, vm.Config{}, snaptest.lastAcceptedHash)
 	if err != nil {
@@ -356,6 +359,7 @@ func (snaptest *restartCrashSnapshotTest) test(t *testing.T) {
 		}
 		snaptest.lastAcceptedHash = newBlocks[i].Hash()
 	}
+	chain.DrainAcceptorQueue()
 
 	// Simulate the blockchain crash
 	// Don't call chain.Stop here, so that no snapshot
@@ -395,6 +399,8 @@ func (snaptest *wipeCrashSnapshotTest) test(t *testing.T) {
 		TrieCleanLimit: 256,
 		TrieDirtyLimit: 256,
 		SnapshotLimit:  0,
+		Pruning:        true,
+		CommitInterval: 4096,
 	}
 	newchain, err := NewBlockChain(snaptest.db, config, params.TestChainConfig, snaptest.engine, vm.Config{}, snaptest.lastAcceptedHash)
 	if err != nil {
@@ -409,6 +415,8 @@ func (snaptest *wipeCrashSnapshotTest) test(t *testing.T) {
 		TrieCleanLimit: 256,
 		TrieDirtyLimit: 256,
 		SnapshotLimit:  256,
+		Pruning:        true,
+		CommitInterval: 4096,
 	}
 	newchain, err = NewBlockChain(snaptest.db, config, params.TestChainConfig, snaptest.engine, vm.Config{}, snaptest.lastAcceptedHash)
 	if err != nil {

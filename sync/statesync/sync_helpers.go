@@ -1,4 +1,4 @@
-// (c) 2021-2022, Dijets, Inc. All rights reserved.
+// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesync
@@ -10,8 +10,8 @@ import (
 	"github.com/lasthyphen/coreth/core/state/snapshot"
 	"github.com/lasthyphen/coreth/core/types"
 	"github.com/lasthyphen/coreth/ethdb"
-	syncclient "github.com/lasthyphen/coreth/sync/client"
 	"github.com/lasthyphen/coreth/trie"
+	"github.com/lasthyphen/coreth/utils"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -102,7 +102,7 @@ func restoreMainTrieProgressFromSnapshot(db ethdb.Iteratee, tr *TrieProgress) er
 		// since lastKey is already added to the stack trie,
 		// we should start syncing from the next key.
 		tr.startFrom = lastKey
-		syncclient.IncrOne(tr.startFrom)
+		utils.IncrOne(tr.startFrom)
 	}
 	return it.Error()
 }
@@ -136,7 +136,7 @@ func restoreStorageTrieProgressFromSnapshot(db ethdb.Iteratee, tr *TrieProgress,
 		// since lastKey is already added to the stack trie,
 		// we should start syncing from the next key.
 		tr.startFrom = lastKey
-		syncclient.IncrOne(tr.startFrom)
+		utils.IncrOne(tr.startFrom)
 	}
 	return it.Error()
 }

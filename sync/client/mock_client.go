@@ -1,10 +1,11 @@
-// (c) 2021-2022, Dijets, Inc. All rights reserved.
+// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesyncclient
 
 import (
 	"context"
+	"fmt"
 	"sync/atomic"
 
 	"github.com/lasthyphen/beacongo/codec"
@@ -13,9 +14,13 @@ import (
 	"github.com/lasthyphen/coreth/plugin/evm/message"
 	"github.com/lasthyphen/coreth/sync/handlers"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
-var _ Client = &MockClient{}
+var (
+	_               Client         = &MockClient{}
+	mockBlockParser EthBlockParser = &testBlockParser{}
+)
 
 // TODO replace with gomock library
 type MockClient struct {
@@ -116,7 +121,8 @@ func (ml *MockClient) GetBlocks(blockHash common.Hash, height uint64, numParents
 		return nil, err
 	}
 
-	blocksRes, numBlocks, err := parseBlocks(ml.codec, request, response)
+	client := &client{blockParser: mockBlockParser} // Hack to avoid duplicate code
+	blocksRes, numBlocks, err := client.parseBlocks(ml.codec, request, response)
 	if err != nil {
 		return nil, err
 	}
@@ -130,4 +136,15 @@ func (ml *MockClient) GetBlocks(blockHash common.Hash, height uint64, numParents
 
 func (ml *MockClient) BlocksReceived() int32 {
 	return atomic.LoadInt32(&ml.blocksReceived)
+}
+
+type testBlockParser struct{}
+
+func (t *testBlockParser) ParseEthBlock(b []byte) (*types.Block, error) {
+	block := new(types.Block)
+	if err := rlp.DecodeBytes(b, block); err != nil {
+		return nil, fmt.Errorf("%s: %w", errUnmarshalResponse, err)
+	}
+
+	return block, nil
 }

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Dijets, Inc.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -104,6 +104,7 @@ func newTestBackend(t *testing.T, n int, gspec *core.Genesis, generator func(i i
 		}
 	}
 	backend.chain = chain
+	chain.DrainAcceptorQueue()
 	return backend
 }
 

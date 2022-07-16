@@ -1,4 +1,4 @@
-// (c) 2019-2020, Dijets, Inc. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -101,9 +101,10 @@ var (
 	x2cRate       = big.NewInt(x2cRateInt64)
 	x2cRateMinus1 = big.NewInt(x2cRateMinus1Int64)
 
-	_ block.ChainVM              = &VM{}
-	_ block.StateSyncableVM      = &VM{}
-	_ block.HeightIndexedChainVM = &VM{}
+	_ block.ChainVM                  = &VM{}
+	_ block.StateSyncableVM          = &VM{}
+	_ block.HeightIndexedChainVM     = &VM{}
+	_ statesyncclient.EthBlockParser = &VM{}
 )
 
 const (
@@ -425,6 +426,7 @@ func (vm *VM) Initialize(
 	vm.ethConfig.AllowUnprotectedTxs = vm.config.AllowUnprotectedTxs
 	vm.ethConfig.Preimages = vm.config.Preimages
 	vm.ethConfig.Pruning = vm.config.Pruning
+	vm.ethConfig.AcceptorQueueLimit = vm.config.AcceptorQueueLimit
 	vm.ethConfig.PopulateMissingTries = vm.config.PopulateMissingTries
 	vm.ethConfig.PopulateMissingTriesParallelism = vm.config.PopulateMissingTriesParallelism
 	vm.ethConfig.AllowMissingTries = vm.config.AllowMissingTries
@@ -586,6 +588,7 @@ func (vm *VM) initializeStateSyncClient(lastAcceptedHeight uint64) error {
 				MaxAttempts:      maxRetryAttempts,
 				MaxRetryDelay:    defaultMaxRetryDelay,
 				StateSyncNodeIDs: stateSyncIDs,
+				BlockParser:      vm,
 			},
 		),
 		enabled:            vm.config.StateSyncEnabled,
@@ -927,7 +930,13 @@ func (vm *VM) setAppRequestHandlers() {
 			Cache: vm.config.StateSyncServerTrieCache,
 		},
 	)
-	syncRequestHandler := handlers.NewSyncHandler(vm.chain.BlockChain().GetBlock, evmTrieDB, vm.atomicTrie.TrieDB(), vm.networkCodec, handlerstats.NewHandlerStats(metrics.Enabled))
+	syncRequestHandler := handlers.NewSyncHandler(
+		vm.chain.BlockChain(),
+		evmTrieDB,
+		vm.atomicTrie.TrieDB(),
+		vm.networkCodec,
+		handlerstats.NewHandlerStats(metrics.Enabled),
+	)
 	vm.Network.SetRequestHandler(syncRequestHandler)
 }
 
@@ -1018,6 +1027,15 @@ func (vm *VM) parseBlock(b []byte) (snowman.Block, error) {
 		return nil, fmt.Errorf("syntactic block verification failed: %w", err)
 	}
 	return block, nil
+}
+
+func (vm *VM) ParseEthBlock(b []byte) (*types.Block, error) {
+	block, err := vm.parseBlock(b)
+	if err != nil {
+		return nil, err
+	}
+
+	return block.(*Block).ethBlock, nil
 }
 
 // getBlock attempts to retrieve block [id] from the VM to be wrapped

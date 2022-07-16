@@ -1,4 +1,4 @@
-// (c) 2019-2020, Dijets, Inc.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -67,6 +67,9 @@ var (
 	// pruningDisabledKey tracks whether the node has ever run in archival mode
 	// to ensure that a user does not accidentally corrupt an archival node.
 	pruningDisabledKey = []byte("PruningDisabled")
+
+	// acceptorTipKey tracks the tip of the last accepted block that has been fully processed.
+	acceptorTipKey = []byte("AcceptorTipKey")
 
 	// Data item prefixes (use single byte to avoid mixing data types, avoid `i`, used for indexes).
 	headerPrefix       = []byte("h") // headerPrefix + num (uint64 big endian) + hash -> header

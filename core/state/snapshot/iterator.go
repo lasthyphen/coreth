@@ -1,4 +1,4 @@
-// (c) 2019-2020, Dijets, Inc.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -351,10 +351,16 @@ type diskStorageIterator struct {
 // is always false.
 func (dl *diskLayer) StorageIterator(account common.Hash, seek common.Hash) (StorageIterator, bool) {
 	pos := common.TrimRightZeroes(seek[:])
+
+	// create prefix to be rawdb.SnapshotStoragePrefix + account[:]
+	prefix := make([]byte, len(rawdb.SnapshotStoragePrefix)+common.HashLength)
+	copy(prefix, rawdb.SnapshotStoragePrefix)
+	copy(prefix[len(rawdb.SnapshotStoragePrefix):], account[:])
+
 	return &diskStorageIterator{
 		layer:   dl,
 		account: account,
-		it:      dl.diskdb.NewIterator(append(rawdb.SnapshotStoragePrefix, account.Bytes()...), pos),
+		it:      dl.diskdb.NewIterator(prefix, pos),
 	}, false
 }
 

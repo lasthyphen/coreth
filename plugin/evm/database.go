@@ -1,4 +1,4 @@
-// (c) 2019-2020, Dijets, Inc. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -12,6 +12,9 @@ var _ ethdb.Database = &Database{}
 
 // Database implements ethdb.Database
 type Database struct{ database.Database }
+
+// Stat implements ethdb.Database
+func (db Database) Stat(string) (string, error) { return "", database.ErrNotFound }
 
 // NewBatch implements ethdb.Database
 func (db Database) NewBatch() ethdb.Batch { return Batch{db.Database.NewBatch()} }

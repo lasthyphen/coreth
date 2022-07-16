@@ -1,4 +1,4 @@
-// (c) 2019-2020, Dijets, Inc. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package params
@@ -20,7 +20,7 @@ const (
 
 	ApricotPhase1GasLimit uint64 = 8_000_000
 
-	ApricotPhase3ExtraDataSize                   = 80
+	ApricotPhase3ExtraDataSize            uint64 = 80
 	ApricotPhase3MinBaseFee               int64  = 75_000_000_000
 	ApricotPhase3MaxBaseFee               int64  = 225_000_000_000
 	ApricotPhase3InitialBaseFee           int64  = 225_000_000_000

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Dijets, Inc. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -50,8 +50,8 @@ type client struct {
 // NewClient returns a Client for interacting with EVM [chain]
 func NewClient(uri, chain string) Client {
 	return &client{
-		requester:      rpc.NewEndpointRequester(uri, fmt.Sprintf("/ext/bc/%s/djtx", chain), "djtx"),
-		adminRequester: rpc.NewEndpointRequester(uri, fmt.Sprintf("/ext/bc/%s/admin", chain), "admin"),
+		requester:      rpc.NewEndpointRequester(fmt.Sprintf("%s/ext/bc/%s/djtx", uri, chain), "djtx"),
+		adminRequester: rpc.NewEndpointRequester(fmt.Sprintf("%s/ext/bc/%s/admin", uri, chain), "admin"),
 	}
 }
 

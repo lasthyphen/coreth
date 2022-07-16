@@ -1,4 +1,4 @@
-// (c) 2020-2021, Dijets, Inc. All rights reserved.
+// (c) 2020-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -6,6 +6,8 @@ package evm
 import (
 	"encoding/binary"
 	"testing"
+
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/stretchr/testify/assert"
 
@@ -613,7 +615,7 @@ func BenchmarkAtomicTrieIterate(b *testing.B) {
 }
 
 func levelDB(t testing.TB) database.Database {
-	db, err := leveldb.New(t.TempDir(), nil, logging.NoLog{})
+	db, err := leveldb.New(t.TempDir(), nil, logging.NoLog{}, "", prometheus.NewRegistry())
 	if err != nil {
 		t.Fatal(err)
 	}

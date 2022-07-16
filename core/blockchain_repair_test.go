@@ -1,4 +1,4 @@
-// (c) 2019-2021, Dijets, Inc.
+// (c) 2019-2021, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -565,6 +565,7 @@ func testRepair(t *testing.T, tt *rewindTest, snapshots bool) {
 				}
 				lastAcceptedHash = canonblocks[i].Hash()
 			}
+			chain.DrainAcceptorQueue()
 		}
 	}
 	if _, err := chain.InsertChain(canonblocks[tt.commitBlock:]); err != nil {
@@ -574,14 +575,14 @@ func testRepair(t *testing.T, tt *rewindTest, snapshots bool) {
 	// Pull the plug on the database, simulating a hard crash
 	db.Close()
 
-	// Start a new blockchain back up and see where the repait leads us
+	// Start a new blockchain back up and see where the repair leads us
 	db, err = rawdb.NewLevelDBDatabase(datadir, 0, 0, "", false)
 	if err != nil {
 		t.Fatalf("Failed to reopen persistent database: %v", err)
 	}
 	defer db.Close()
 
-	newChain, err := NewBlockChain(db, DefaultCacheConfig, params.TestChainConfig, engine, vm.Config{}, lastAcceptedHash)
+	newChain, err := NewBlockChain(db, config, params.TestChainConfig, engine, vm.Config{}, lastAcceptedHash)
 	if err != nil {
 		t.Fatalf("Failed to recreate chain: %v", err)
 	}

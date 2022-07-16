@@ -1,4 +1,4 @@
-// (c) 2021-2022, Dijets, Inc. All rights reserved.
+// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -40,7 +40,7 @@ func TestMarshalLeafsRequest(t *testing.T) {
 		NodeType: StateTrieNode,
 	}
 
-	base64LeafsRequest := "AAAAAAAAAAAAAAAAAAAAAABpbSBST09UaW5nIGZvciB5YQAAACBS/fwHIYJlTxY/Xw+aYh1ylWbHTRADfE17uwQH0eLGSQAAACCBhVrYaB0NhtHpHgAWeTnLZpTSxCKs0gigByk5SH9pmQQAAQ=="
+	base64LeafsRequest := "AAAAAAAAAAAAAAAAAAAAAABpbSBST09UaW5nIGZvciB5YQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIFL9/AchgmVPFj9fD5piHXKVZsdNEAN8TXu7BAfR4sZJAAAAIIGFWthoHQ2G0ekeABZ5OctmlNLEIqzSCKAHKTlIf2mZBAAB"
 
 	leafsRequestBytes, err := Codec.Marshal(Version, leafsRequest)
 	assert.NoError(t, err)

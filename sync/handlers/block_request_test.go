@@ -1,4 +1,4 @@
-// (c) 2021-2022, Dijets, Inc. All rights reserved.
+// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handlers
@@ -41,13 +41,16 @@ func TestBlockRequestHandler(t *testing.T) {
 	}
 
 	mockHandlerStats := &stats.MockHandlerStats{}
-	blockRequestHandler := NewBlockRequestHandler(func(hash common.Hash, height uint64) *types.Block {
-		blk, ok := blocksDB[hash]
-		if !ok || blk.NumberU64() != height {
-			return nil
-		}
-		return blk
-	}, message.Codec, mockHandlerStats)
+	blockProvider := &TestBlockProvider{
+		GetBlockFn: func(hash common.Hash, height uint64) *types.Block {
+			blk, ok := blocksDB[hash]
+			if !ok || blk.NumberU64() != height {
+				return nil
+			}
+			return blk
+		},
+	}
+	blockRequestHandler := NewBlockRequestHandler(blockProvider, message.Codec, mockHandlerStats)
 
 	tests := []struct {
 		name string
@@ -163,18 +166,21 @@ func TestBlockRequestHandlerCtxExpires(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	blockRequestCallCount := 0
-	blockRequestHandler := NewBlockRequestHandler(func(hash common.Hash, height uint64) *types.Block {
-		blockRequestCallCount++
-		// cancel ctx after the 2nd call to simulate ctx expiring due to deadline exceeding
-		if blockRequestCallCount >= cancelAfterNumRequests {
-			cancel()
-		}
-		blk, ok := blocksDB[hash]
-		if !ok || blk.NumberU64() != height {
-			return nil
-		}
-		return blk
-	}, message.Codec, stats.NewNoopHandlerStats())
+	blockProvider := &TestBlockProvider{
+		GetBlockFn: func(hash common.Hash, height uint64) *types.Block {
+			blockRequestCallCount++
+			// cancel ctx after the 2nd call to simulate ctx expiring due to deadline exceeding
+			if blockRequestCallCount >= cancelAfterNumRequests {
+				cancel()
+			}
+			blk, ok := blocksDB[hash]
+			if !ok || blk.NumberU64() != height {
+				return nil
+			}
+			return blk
+		},
+	}
+	blockRequestHandler := NewBlockRequestHandler(blockProvider, message.Codec, stats.NewNoopHandlerStats())
 
 	responseBytes, err := blockRequestHandler.OnBlockRequest(ctx, ids.GenerateTestNodeID(), 1, message.BlockRequest{
 		Hash:    blocks[10].Hash(),

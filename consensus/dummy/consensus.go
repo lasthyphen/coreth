@@ -1,4 +1,4 @@
-// (c) 2019-2020, Dijets, Inc. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package dummy
@@ -199,7 +199,7 @@ func (self *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header 
 			return fmt.Errorf("extra-data too long: %d > %d", len(header.Extra), params.MaximumExtraDataSize)
 		}
 	} else {
-		if len(header.Extra) != params.ApricotPhase3ExtraDataSize {
+		if uint64(len(header.Extra)) != params.ApricotPhase3ExtraDataSize {
 			return fmt.Errorf("expected extra-data field to be: %d, but found %d", params.ApricotPhase3ExtraDataSize, len(header.Extra))
 		}
 	}

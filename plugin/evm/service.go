@@ -1,4 +1,4 @@
-// (c) 2019-2020, Dijets, Inc. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -51,7 +51,7 @@ type GetAcceptedFrontReply struct {
 
 // GetAcceptedFront returns the last accepted block's hash and height
 func (api *SnowmanAPI) GetAcceptedFront(ctx context.Context) (*GetAcceptedFrontReply, error) {
-	blk := api.vm.chain.LastAcceptedBlock()
+	blk := api.vm.chain.LastConsensusAcceptedBlock()
 	return &GetAcceptedFrontReply{
 		Hash:   blk.Hash(),
 		Number: blk.Number(),
