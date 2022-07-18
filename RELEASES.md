@@ -1,24 +1,7 @@
 # Release Notes
 
-## [v0.8.11](https://github.com/lasthyphen/coreth/releases/tag/v0.8.11)
-
-## [v0.8.10](https://github.com/lasthyphen/coreth/releases/tag/v0.8.10)
-
-- Add beta support for fast sync
-- Bump trie tip buffer size to 32
-- Fix bug in metrics initialization
-
-## [v0.8.9](https://github.com/lasthyphen/coreth/releases/tag/v0.8.9)
-
-- Fix deadlock bug on shutdown causing historical re-generation on restart
-- Add API endpoint to fetch running VM Config
-- Add AvalancheGo custom log formatting to C-Chain logs
-- Deprecate support for JS Tracer
-
 ## [v0.8.8](https://github.com/lasthyphen/coreth/releases/tag/v0.8.8)
 
-- Reduced log level of snapshot regeneration logs
-- Enabled atomic tx replacement with higher gas fees
 - Parallelize trie index re-generation
 
 ## [v0.8.7](https://github.com/lasthyphen/coreth/releases/tag/v0.8.7)

@@ -131,9 +131,3 @@ func loadSnapshot(diskdb ethdb.KeyValueStore, triedb *trie.Database, cache int, 
 
 	return snapshot, generator.Done, nil
 }
-
-// ResetSnapshotGeneration writes a clean snapshot generator marker to [db]
-// so no re-generation is performed after.
-func ResetSnapshotGeneration(db ethdb.KeyValueWriter) {
-	journalProgress(db, nil, nil)
-}

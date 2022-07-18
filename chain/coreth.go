@@ -139,14 +139,7 @@ func (self *ETHChain) Reject(block *types.Block) error {
 	return self.BlockChain().Reject(block)
 }
 
-// LastConsensusAcceptedBlock returns the last block to be marked as accepted.
-// It may or may not be processed.
-func (self *ETHChain) LastConsensusAcceptedBlock() *types.Block {
-	return self.BlockChain().LastConsensusAcceptedBlock()
-}
-
-// LastAcceptedBlock returns the last block to be marked as accepted and
-// processed.
+// LastAcceptedBlock returns the last block to be marked as accepted.
 func (self *ETHChain) LastAcceptedBlock() *types.Block {
 	return self.BlockChain().LastAcceptedBlock()
 }

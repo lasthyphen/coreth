@@ -230,7 +230,6 @@ func TestBlockLogsAllowUnfinalized(t *testing.T) {
 	if err := chain.Accept(block); err != nil {
 		t.Fatal(err)
 	}
-	chain.BlockChain().DrainAcceptorQueue()
 
 	chain.BlockChain().GetVMConfig().AllowUnfinalizedQueries = false
 	logs, err = api.GetLogs(ctx, fc)

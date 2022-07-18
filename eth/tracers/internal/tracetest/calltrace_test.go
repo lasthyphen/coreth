@@ -49,7 +49,8 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
 
-	// Force-load native, to trigger registration
+	// Force-load native and js pacakges, to trigger registration
+	_ "github.com/lasthyphen/coreth/eth/tracers/js"
 	_ "github.com/lasthyphen/coreth/eth/tracers/native"
 )
 
@@ -131,6 +132,12 @@ type callTracerTest struct {
 	Context *callContext  `json:"context"`
 	Input   string        `json:"input"`
 	Result  *callTrace    `json:"result"`
+}
+
+// Iterates over all the input-output datasets in the tracer test harness and
+// runs the JavaScript tracers against them.
+func TestCallTracerLegacy(t *testing.T) {
+	testCallTracer("callTracerLegacy", "call_tracer_legacy", t)
 }
 
 func TestCallTracerNative(t *testing.T) {
@@ -242,7 +249,6 @@ func camel(str string) string {
 	}
 	return strings.Join(pieces, "")
 }
-
 func BenchmarkTracers(b *testing.B) {
 	files, err := ioutil.ReadDir(filepath.Join("testdata", "call_tracer"))
 	if err != nil {
@@ -262,7 +268,7 @@ func BenchmarkTracers(b *testing.B) {
 			if err := json.Unmarshal(blob, test); err != nil {
 				b.Fatalf("failed to parse testcase: %v", err)
 			}
-			benchTracer("callTracer", test, b)
+			benchTracer("callTracerNative", test, b)
 		})
 	}
 }

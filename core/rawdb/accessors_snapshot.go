@@ -153,3 +153,11 @@ func WriteSnapshotGenerator(db ethdb.KeyValueWriter, generator []byte) {
 		log.Crit("Failed to store snapshot generator", "err", err)
 	}
 }
+
+// DeleteSnapshotGenerator deletes the serialized snapshot generator saved at
+// the last shutdown
+func DeleteSnapshotGenerator(db ethdb.KeyValueWriter) {
+	if err := db.Delete(snapshotGeneratorKey); err != nil {
+		log.Crit("Failed to remove snapshot generator", "err", err)
+	}
+}

@@ -9,7 +9,7 @@ import (
 	"github.com/lasthyphen/beacongo/ids"
 	"github.com/lasthyphen/beacongo/utils/constants"
 	"github.com/lasthyphen/beacongo/utils/crypto"
-	"github.com/lasthyphen/beacongo/utils/formatting/address"
+	"github.com/lasthyphen/beacongo/utils/formatting"
 	"github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 )
@@ -40,7 +40,7 @@ func (vm *VM) FormatAddress(chainID ids.ID, addr ids.ShortID) (string, error) {
 		return "", err
 	}
 	hrp := constants.GetHRP(vm.ctx.NetworkID)
-	return address.Format(chainIDAlias, hrp, addr.Bytes())
+	return formatting.FormatAddress(chainIDAlias, hrp, addr.Bytes())
 }
 
 // ParseEthAddress parses [addrStr] and returns an Ethereum address
@@ -49,6 +49,11 @@ func ParseEthAddress(addrStr string) (common.Address, error) {
 		return common.Address{}, errInvalidAddr
 	}
 	return common.HexToAddress(addrStr), nil
+}
+
+// FormatEthAddress formats [addr] into a string
+func FormatEthAddress(addr common.Address) string {
+	return addr.Hex()
 }
 
 // GetEthAddress returns the ethereum address derived from [privKey]

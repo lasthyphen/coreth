@@ -13,13 +13,11 @@ import (
 )
 
 const (
-	defaultAcceptorQueueLimit                     = 64 // Provides 2 minutes of buffer (2s block target) for a commit delay
 	defaultPruningEnabled                         = true
-	defaultCommitInterval                         = 4096
-	defaultSyncableCommitInterval                 = defaultCommitInterval * 4
 	defaultSnapshotAsync                          = true
 	defaultRpcGasCap                              = 50_000_000 // Default to 50M Gas Limit
 	defaultRpcTxFeeCap                            = 100        // 100 DJTX
+	defaultMetricsEnabled                         = true
 	defaultMetricsExpensiveEnabled                = false
 	defaultApiMaxDuration                         = 0 // Default to no maximum API call duration
 	defaultWsCpuRefillRate                        = 0 // Default to no maximum WS CPU usage
@@ -31,18 +29,8 @@ const (
 	defaultTxRegossipMaxSize                      = 15
 	defaultOfflinePruningBloomFilterSize   uint64 = 512 // Default size (MB) for the offline pruner to use
 	defaultLogLevel                               = "info"
-	defaultPopulateMissingTriesParallelism        = 1024
 	defaultMaxOutboundActiveRequests              = 8
-	defaultStateSyncServerTrieCache               = 64 // MB
-
-	// defaultStateSyncMinBlocks is the minimum number of blocks the blockchain
-	// should be ahead of local last accepted to perform state sync.
-	// This constant is chosen so normal bootstrapping is preferred when it would
-	// be faster than state sync.
-	// time assumptions:
-	// - normal bootstrap processing time: ~14 blocks / second
-	// - state sync time: ~6 hrs.
-	defaultStateSyncMinBlocks = 300_000
+	defaultPopulateMissingTriesParallelism        = 1024
 )
 
 var defaultEnabledAPIs = []string{
@@ -86,14 +74,13 @@ type Config struct {
 
 	// Pruning Settings
 	Pruning                         bool    `json:"pruning-enabled"`                    // If enabled, trie roots are only persisted every 4096 blocks
-	AcceptorQueueLimit              int     `json:"accepted-queue-limit"`               // Maximum blocks to queue before blocking during acceptance
-	CommitInterval                  uint64  `json:"commit-interval"`                    // Specifies the commit interval at which to persist EVM and atomic tries.
 	AllowMissingTries               bool    `json:"allow-missing-tries"`                // If enabled, warnings preventing an incomplete trie index are suppressed
 	PopulateMissingTries            *uint64 `json:"populate-missing-tries,omitempty"`   // Sets the starting point for re-populating missing tries. Disables re-generation if nil.
 	PopulateMissingTriesParallelism int     `json:"populate-missing-tries-parallelism"` // Number of concurrent readers to use when re-populating missing tries on startup.
 
 	// Metric Settings
-	MetricsExpensiveEnabled bool `json:"metrics-expensive-enabled"` // Debug-level metrics that might impact runtime performance
+	MetricsEnabled          bool `json:"metrics-enabled"`
+	MetricsExpensiveEnabled bool `json:"metrics-expensive-enabled"`
 
 	// API Settings
 	LocalTxsEnabled         bool     `json:"local-txs-enabled"`
@@ -124,15 +111,6 @@ type Config struct {
 
 	// VM2VM network
 	MaxOutboundActiveRequests int64 `json:"max-outbound-active-requests"`
-
-	// Sync settings
-	StateSyncEnabled         bool   `json:"state-sync-enabled"`
-	StateSyncSkipResume      bool   `json:"state-sync-skip-resume"` // Forces state sync to use the highest available summary block
-	StateSyncServerTrieCache int    `json:"state-sync-server-trie-cache"`
-	StateSyncIDs             string `json:"state-sync-ids"`
-	StateSyncCommitInterval  uint64 `json:"state-sync-commit-interval"`
-	StateSyncMinBlocks       uint64 `json:"state-sync-min-blocks"`
-	StateSyncDisableRequests bool   `json:"state-sync-disable-requests"` // Disables serving state sync data on incoming requests
 }
 
 // EthAPIs returns an array of strings representing the Eth APIs that should be enabled
@@ -148,6 +126,7 @@ func (c *Config) SetDefaults() {
 	c.EnabledEthAPIs = defaultEnabledAPIs
 	c.RPCGasCap = defaultRpcGasCap
 	c.RPCTxFeeCap = defaultRpcTxFeeCap
+	c.MetricsEnabled = defaultMetricsEnabled
 	c.MetricsExpensiveEnabled = defaultMetricsExpensiveEnabled
 	c.APIMaxDuration.Duration = defaultApiMaxDuration
 	c.WSCPURefillRate.Duration = defaultWsCpuRefillRate
@@ -156,18 +135,13 @@ func (c *Config) SetDefaults() {
 	c.ContinuousProfilerFrequency.Duration = defaultContinuousProfilerFrequency
 	c.ContinuousProfilerMaxFiles = defaultContinuousProfilerMaxFiles
 	c.Pruning = defaultPruningEnabled
-	c.AcceptorQueueLimit = defaultAcceptorQueueLimit
 	c.SnapshotAsync = defaultSnapshotAsync
 	c.TxRegossipFrequency.Duration = defaultTxRegossipFrequency
 	c.TxRegossipMaxSize = defaultTxRegossipMaxSize
 	c.OfflinePruningBloomFilterSize = defaultOfflinePruningBloomFilterSize
 	c.LogLevel = defaultLogLevel
-	c.PopulateMissingTriesParallelism = defaultPopulateMissingTriesParallelism
 	c.MaxOutboundActiveRequests = defaultMaxOutboundActiveRequests
-	c.StateSyncServerTrieCache = defaultStateSyncServerTrieCache
-	c.CommitInterval = defaultCommitInterval
-	c.StateSyncCommitInterval = defaultSyncableCommitInterval
-	c.StateSyncMinBlocks = defaultStateSyncMinBlocks
+	c.PopulateMissingTriesParallelism = defaultPopulateMissingTriesParallelism
 }
 
 func (d *Duration) UnmarshalJSON(data []byte) (err error) {
@@ -190,10 +164,6 @@ func (c *Config) Validate() error {
 
 	if !c.Pruning && c.OfflinePruning {
 		return fmt.Errorf("cannot run offline pruning while pruning is disabled")
-	}
-	// If pruning is enabled, the commit interval must be non-zero so the node commits state tries every CommitInterval blocks.
-	if c.Pruning && c.CommitInterval == 0 {
-		return fmt.Errorf("cannot use commit interval of 0 with pruning enabled")
 	}
 
 	return nil

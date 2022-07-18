@@ -38,10 +38,10 @@ import (
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/lasthyphen/coreth/core/rawdb"
 	"github.com/lasthyphen/coreth/ethdb"
-	"github.com/lasthyphen/coreth/metrics"
 	"github.com/lasthyphen/coreth/trie"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/metrics"
 )
 
 const (
@@ -910,21 +910,6 @@ func (t *Tree) DiskRoot() common.Hash {
 	defer t.lock.Unlock()
 
 	return t.diskRoot()
-}
-
-func (t *Tree) DiskAccountIterator(seek common.Hash) AccountIterator {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
-	return t.disklayer().AccountIterator(seek)
-}
-
-func (t *Tree) DiskStorageIterator(account common.Hash, seek common.Hash) StorageIterator {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
-	it, _ := t.disklayer().StorageIterator(account, seek)
-	return it
 }
 
 // NewTestTree creates a *Tree with a pre-populated diskLayer
