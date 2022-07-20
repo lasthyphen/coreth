@@ -12,7 +12,7 @@
 // This file is part of the go-ethereum library.
 //
 // The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
+// it under the terms of the GNU eth/ethconfig/config.go Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
@@ -52,18 +52,6 @@ var DefaultConfig = NewDefaultConfig()
 func NewDefaultConfig() Config {
 	return Config{
 		NetworkId:          1,
-		LightPeers:         100,
-		UltraLightFraction: 75,
-		DatabaseCache:      512,
-		TrieCleanCache:     128,
-		TrieDirtyCache:     256,
-		SnapshotCache:      128,
-		Miner:              miner.Config{},
-		TxPool:             core.DefaultTxPoolConfig,
-		RPCGasCap:          25000000,
-		RPCEVMTimeout:      5 * time.Second,
-		GPO:                DefaultFullGPOConfig,
-		RPCTxFeeCap:        1, // 1 DJTX
 	}
 }
 
