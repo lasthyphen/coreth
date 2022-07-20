@@ -6,7 +6,7 @@ package stats
 import (
 	"time"
 
-	"github.com/lasthyphen/coreth/metrics"
+	"github.com/lasthyphen/coreth/metrics/prometheus"
 )
 
 // HandlerStats reports prometheus metrics for the state sync handlers

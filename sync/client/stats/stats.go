@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/lasthyphen/coreth/metrics"
+	"github.com/lasthyphen/coreth/metrics/prometheus"
 	"github.com/lasthyphen/coreth/plugin/evm/message"
 )
 
