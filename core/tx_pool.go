@@ -39,12 +39,12 @@ import (
 	"github.com/lasthyphen/coreth/consensus/dummy"
 	"github.com/lasthyphen/coreth/core/state"
 	"github.com/lasthyphen/coreth/core/types"
+	"github.com/lasthyphen/coreth/metrics"
 	"github.com/lasthyphen/coreth/params"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/prque"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
 )
 
 const (
@@ -61,7 +61,9 @@ const (
 	// non-trivial consequences: larger transactions are significantly harder and
 	// more expensive to propagate; larger transactions also take more resources
 	// to validate whether they fit into the pool or not.
-	txMaxSize = 4 * txSlotSize // 128KB
+	//
+	// Note: the max contract size is 24KB
+	txMaxSize = 32 * 1024 // 32 KB
 )
 
 var (
@@ -606,6 +608,16 @@ func (pool *TxPool) Pending(enforceTips bool) map[common.Address]types.Transacti
 	return pending
 }
 
+// PendingSize returns the number of pending txs in the tx pool.
+func (pool *TxPool) PendingSize() int {
+	pending := pool.Pending(true)
+	count := 0
+	for _, txs := range pending {
+		count += len(txs)
+	}
+	return count
+}
+
 // Locals retrieves the accounts currently considered local by the pool.
 func (pool *TxPool) Locals() []common.Address {
 	pool.mu.Lock()
@@ -630,12 +642,19 @@ func (pool *TxPool) local() map[common.Address]types.Transactions {
 	return txs
 }
 
-func (pool *TxPool) CheckNonceOrdering(from common.Address, txNonce uint64) error {
+// checks transaction validity against the current state.
+func (pool *TxPool) checkTxState(from common.Address, tx *types.Transaction) error {
 	pool.currentStateLock.Lock()
 	defer pool.currentStateLock.Unlock()
 
+	// cost == V + GP * GL
+	if balance, cost := pool.currentState.GetBalance(from), tx.Cost(); balance.Cmp(cost) < 0 {
+		return fmt.Errorf("%w: address %s have (%d) want (%d)", ErrInsufficientFunds, from.Hex(), balance, cost)
+	}
+
+	txNonce := tx.Nonce()
 	// Ensure the transaction adheres to nonce ordering
-	if currentNonce, txNonce := pool.currentState.GetNonce(from), txNonce; currentNonce > txNonce {
+	if currentNonce := pool.currentState.GetNonce(from); currentNonce > txNonce {
 		return fmt.Errorf("%w: address %s current nonce (%d) > tx nonce (%d)",
 			ErrNonceTooLow, from.Hex(), currentNonce, txNonce)
 	}
@@ -654,8 +673,8 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrTxTypeNotSupported
 	}
 	// Reject transactions over defined size to prevent DOS attacks
-	if uint64(tx.Size()) > txMaxSize {
-		return ErrOversizedData
+	if txSize := uint64(tx.Size()); txSize > txMaxSize {
+		return fmt.Errorf("%w tx size %d > max size %d", ErrOversizedData, txSize, txMaxSize)
 	}
 	// Transactions can't be negative. This may never happen using RLP decoded
 	// transactions but may occur if you create a transaction using the RPC.
@@ -690,18 +709,13 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	if pool.minimumFee != nil && tx.GasFeeCapIntCmp(pool.minimumFee) < 0 {
 		return fmt.Errorf("%w: address %s have gas fee cap (%d) < pool minimum fee cap (%d)", ErrUnderpriced, from.Hex(), tx.GasFeeCap(), pool.minimumFee)
 	}
+
 	// Ensure the transaction adheres to nonce ordering
-	if err := pool.CheckNonceOrdering(from, tx.Nonce()); err != nil {
+	if err := pool.checkTxState(from, tx); err != nil {
 		return err
 	}
 	// Transactor should have enough funds to cover the costs
-	// cost == V + GP * GL
-	pool.currentStateLock.Lock()
-	if balance, cost := pool.currentState.GetBalance(from), tx.Cost(); balance.Cmp(cost) < 0 {
-		pool.currentStateLock.Unlock()
-		return fmt.Errorf("%w: address %s have (%d) want (%d)", ErrInsufficientFunds, from.Hex(), balance, cost)
-	}
-	pool.currentStateLock.Unlock()
+
 	// Ensure the transaction has more gas than the basic tx fee.
 	intrGas, err := IntrinsicGas(tx.Data(), tx.AccessList(), tx.To() == nil, true, pool.istanbul)
 	if err != nil {
@@ -988,7 +1002,7 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 	newErrs, dirtyAddrs := pool.addTxsLocked(news, local)
 	pool.mu.Unlock()
 
-	var nilSlot = 0
+	nilSlot := 0
 	for _, err := range newErrs {
 		for errs[nilSlot] != nil {
 			nilSlot++
@@ -1058,6 +1072,13 @@ func (pool *TxPool) Has(hash common.Hash) bool {
 // the given hash.
 func (pool *TxPool) HasLocal(hash common.Hash) bool {
 	return pool.all.GetLocal(hash) != nil
+}
+
+func (pool *TxPool) RemoveTx(hash common.Hash) {
+	pool.mu.Lock()
+	defer pool.mu.Unlock()
+
+	pool.removeTx(hash, true)
 }
 
 // removeTx removes a single transaction from the queue, moving all subsequent
@@ -1548,7 +1569,7 @@ func (pool *TxPool) truncatePending() {
 	pendingRateLimitMeter.Mark(int64(pendingBeforeCap - pending))
 }
 
-// truncateQueue drops the oldes transactions in the queue if the pool is above the global queue limit.
+// truncateQueue drops the oldest transactions in the queue if the pool is above the global queue limit.
 func (pool *TxPool) truncateQueue() {
 	queued := uint64(0)
 	for _, list := range pool.queue {
@@ -1565,7 +1586,7 @@ func (pool *TxPool) truncateQueue() {
 			addresses = append(addresses, addressByHeartbeat{addr, pool.beats[addr]})
 		}
 	}
-	sort.Sort(addresses)
+	sort.Sort(sort.Reverse(addresses))
 
 	// Drop transactions until the total is below the limit or only locals remain
 	for drop := queued - pool.config.GlobalQueue; drop > 0 && len(addresses) > 0; {
@@ -1741,10 +1762,6 @@ func newAccountSet(signer types.Signer, addrs ...common.Address) *accountSet {
 func (as *accountSet) contains(addr common.Address) bool {
 	_, exist := as.accounts[addr]
 	return exist
-}
-
-func (as *accountSet) empty() bool {
-	return len(as.accounts) == 0
 }
 
 // containsTx checks if the sender of a given tx is within the set. If the sender

@@ -7,12 +7,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lasthyphen/beacongo/api"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/utils/formatting"
-	cjson "github.com/lasthyphen/beacongo/utils/json"
-	"github.com/lasthyphen/beacongo/utils/rpc"
 	"github.com/ethereum/go-ethereum/log"
+
+	"github.com/lasthyphen/dijetsnodego/api"
+	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodego/utils/crypto"
+	"github.com/lasthyphen/dijetsnodego/utils/formatting"
+	"github.com/lasthyphen/dijetsnodego/utils/rpc"
+
+	cjson "github.com/lasthyphen/dijetsnodego/utils/json"
 )
 
 // Interface compliance
@@ -25,16 +28,17 @@ type Client interface {
 	GetAtomicTx(ctx context.Context, txID ids.ID) ([]byte, error)
 	GetAtomicUTXOs(ctx context.Context, addrs []string, sourceChain string, limit uint32, startAddress, startUTXOID string) ([][]byte, api.Index, error)
 	ListAddresses(ctx context.Context, userPass api.UserPass) ([]string, error)
-	ExportKey(ctx context.Context, userPass api.UserPass, addr string) (string, string, error)
-	ImportKey(ctx context.Context, userPass api.UserPass, privateKey string) (string, error)
+	ExportKey(ctx context.Context, userPass api.UserPass, addr string) (*crypto.PrivateKeySECP256K1R, string, error)
+	ImportKey(ctx context.Context, userPass api.UserPass, privateKey *crypto.PrivateKeySECP256K1R) (string, error)
 	Import(ctx context.Context, userPass api.UserPass, to string, sourceChain string) (ids.ID, error)
 	ExportDJTX(ctx context.Context, userPass api.UserPass, amount uint64, to string) (ids.ID, error)
 	Export(ctx context.Context, userPass api.UserPass, amount uint64, to string, assetID string) (ids.ID, error)
-	StartCPUProfiler(ctx context.Context) (bool, error)
-	StopCPUProfiler(ctx context.Context) (bool, error)
-	MemoryProfile(ctx context.Context) (bool, error)
-	LockProfile(ctx context.Context) (bool, error)
-	SetLogLevel(ctx context.Context, level log.Lvl) (bool, error)
+	StartCPUProfiler(ctx context.Context) error
+	StopCPUProfiler(ctx context.Context) error
+	MemoryProfile(ctx context.Context) error
+	LockProfile(ctx context.Context) error
+	SetLogLevel(ctx context.Context, level log.Lvl) error
+	GetVMConfig(ctx context.Context) (*Config, error)
 }
 
 // Client implementation for interacting with EVM [chain]
@@ -46,8 +50,8 @@ type client struct {
 // NewClient returns a Client for interacting with EVM [chain]
 func NewClient(uri, chain string) Client {
 	return &client{
-		requester:      rpc.NewEndpointRequester(uri, fmt.Sprintf("/ext/bc/%s/djtx", chain), "djtx"),
-		adminRequester: rpc.NewEndpointRequester(uri, fmt.Sprintf("/ext/bc/%s/admin", chain), "admin"),
+		requester:      rpc.NewEndpointRequester(fmt.Sprintf("%s/ext/bc/%s/djtx", uri, chain), "djtx"),
+		adminRequester: rpc.NewEndpointRequester(fmt.Sprintf("%s/ext/bc/%s/admin", uri, chain), "admin"),
 	}
 }
 
@@ -59,7 +63,7 @@ func NewCChainClient(uri string) Client {
 // IssueTx issues a transaction to a node and returns the TxID
 func (c *client) IssueTx(ctx context.Context, txBytes []byte) (ids.ID, error) {
 	res := &api.JSONTxID{}
-	txStr, err := formatting.EncodeWithChecksum(formatting.Hex, txBytes)
+	txStr, err := formatting.Encode(formatting.Hex, txBytes)
 	if err != nil {
 		return res.TxID, fmt.Errorf("problem hex encoding bytes: %w", err)
 	}
@@ -131,7 +135,7 @@ func (c *client) ListAddresses(ctx context.Context, user api.UserPass) ([]string
 
 // ExportKey returns the private key corresponding to [addr] controlled by [user]
 // in both Avalanche standard format and hex format
-func (c *client) ExportKey(ctx context.Context, user api.UserPass, addr string) (string, string, error) {
+func (c *client) ExportKey(ctx context.Context, user api.UserPass, addr string) (*crypto.PrivateKeySECP256K1R, string, error) {
 	res := &ExportKeyReply{}
 	err := c.requester.SendRequest(ctx, "exportKey", &ExportKeyArgs{
 		UserPass: user,
@@ -141,7 +145,7 @@ func (c *client) ExportKey(ctx context.Context, user api.UserPass, addr string) 
 }
 
 // ImportKey imports [privateKey] to [user]
-func (c *client) ImportKey(ctx context.Context, user api.UserPass, privateKey string) (string, error) {
+func (c *client) ImportKey(ctx context.Context, user api.UserPass, privateKey *crypto.PrivateKeySECP256K1R) (string, error) {
 	res := &api.JSONAddress{}
 	err := c.requester.SendRequest(ctx, "importKey", &ImportKeyArgs{
 		UserPass:   user,
@@ -195,35 +199,32 @@ func (c *client) Export(
 	return res.TxID, err
 }
 
-func (c *client) StartCPUProfiler(ctx context.Context) (bool, error) {
-	res := &api.SuccessResponse{}
-	err := c.adminRequester.SendRequest(ctx, "startCPUProfiler", struct{}{}, res)
-	return res.Success, err
+func (c *client) StartCPUProfiler(ctx context.Context) error {
+	return c.adminRequester.SendRequest(ctx, "startCPUProfiler", struct{}{}, &api.EmptyReply{})
 }
 
-func (c *client) StopCPUProfiler(ctx context.Context) (bool, error) {
-	res := &api.SuccessResponse{}
-	err := c.adminRequester.SendRequest(ctx, "stopCPUProfiler", struct{}{}, res)
-	return res.Success, err
+func (c *client) StopCPUProfiler(ctx context.Context) error {
+	return c.adminRequester.SendRequest(ctx, "stopCPUProfiler", struct{}{}, &api.EmptyReply{})
 }
 
-func (c *client) MemoryProfile(ctx context.Context) (bool, error) {
-	res := &api.SuccessResponse{}
-	err := c.adminRequester.SendRequest(ctx, "memoryProfile", struct{}{}, res)
-	return res.Success, err
+func (c *client) MemoryProfile(ctx context.Context) error {
+	return c.adminRequester.SendRequest(ctx, "memoryProfile", struct{}{}, &api.EmptyReply{})
 }
 
-func (c *client) LockProfile(ctx context.Context) (bool, error) {
-	res := &api.SuccessResponse{}
-	err := c.adminRequester.SendRequest(ctx, "lockProfile", struct{}{}, res)
-	return res.Success, err
+func (c *client) LockProfile(ctx context.Context) error {
+	return c.adminRequester.SendRequest(ctx, "lockProfile", struct{}{}, &api.EmptyReply{})
 }
 
 // SetLogLevel dynamically sets the log level for the C Chain
-func (c *client) SetLogLevel(ctx context.Context, level log.Lvl) (bool, error) {
-	res := &api.SuccessResponse{}
-	err := c.adminRequester.SendRequest(ctx, "setLogLevel", &SetLogLevelArgs{
+func (c *client) SetLogLevel(ctx context.Context, level log.Lvl) error {
+	return c.adminRequester.SendRequest(ctx, "setLogLevel", &SetLogLevelArgs{
 		Level: level.String(),
-	}, res)
-	return res.Success, err
+	}, &api.EmptyReply{})
+}
+
+// GetVMConfig returns the current config of the VM
+func (c *client) GetVMConfig(ctx context.Context) (*Config, error) {
+	res := &ConfigReply{}
+	err := c.adminRequester.SendRequest(ctx, "getVMConfig", struct{}{}, res)
+	return res.Config, err
 }

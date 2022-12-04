@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijetsnodego/ids"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -30,7 +30,7 @@ func (b BlockRequest) String() string {
 	)
 }
 
-func (b BlockRequest) Handle(ctx context.Context, nodeID ids.ShortID, requestID uint32, handler RequestHandler) ([]byte, error) {
+func (b BlockRequest) Handle(ctx context.Context, nodeID ids.NodeID, requestID uint32, handler RequestHandler) ([]byte, error) {
 	return handler.HandleBlockRequest(ctx, nodeID, requestID, b)
 }
 
@@ -40,10 +40,4 @@ func (b BlockRequest) Handle(ctx context.Context, nodeID ids.ShortID, requestID 
 // handler: handlers.BlockRequestHandler
 type BlockResponse struct {
 	Blocks [][]byte `serialize:"true"`
-}
-
-// SerializedMap is map of Keys and Vals to track leaf sync progress
-type SerializedMap struct {
-	Keys []common.Hash `serialize:"true"`
-	Vals []common.Hash `serialize:"true"`
 }

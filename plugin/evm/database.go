@@ -4,15 +4,24 @@
 package evm
 
 import (
-	"github.com/lasthyphen/beacongo/database"
+	"github.com/lasthyphen/dijetsnodego/database"
 	"github.com/lasthyphen/coreth/ethdb"
 )
+
+var _ ethdb.Database = &Database{}
 
 // Database implements ethdb.Database
 type Database struct{ database.Database }
 
+// Stat implements ethdb.Database
+func (db Database) Stat(string) (string, error) { return "", database.ErrNotFound }
+
 // NewBatch implements ethdb.Database
 func (db Database) NewBatch() ethdb.Batch { return Batch{db.Database.NewBatch()} }
+
+// NewBatchWithSize implements ethdb.Database
+// TODO: propagate size through avalanchego Database interface
+func (db Database) NewBatchWithSize(size int) ethdb.Batch { return Batch{db.Database.NewBatch()} }
 
 // NewIterator implements ethdb.Database
 //

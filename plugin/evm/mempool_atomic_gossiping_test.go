@@ -8,11 +8,11 @@ import (
 
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/utils/crypto"
-	"github.com/lasthyphen/beacongo/vms/components/djtx"
-	"github.com/lasthyphen/beacongo/vms/components/chain"
-	"github.com/lasthyphen/beacongo/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodego/utils/crypto"
+	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
+	"github.com/lasthyphen/dijetsnodego/vms/components/chain"
+	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -93,7 +93,7 @@ func TestMempoolAddLocallyCreateAtomicTx(t *testing.T) {
 func TestMempoolMaxMempoolSizeHandling(t *testing.T) {
 	assert := assert.New(t)
 
-	_, vm, _, sharedMemory, _ := GenesisVM(t, true, genesisJSONApricotPhase4, "", "")
+	_, vm, _, sharedMemory, _ := GenesisVM(t, true, "", "", "")
 	defer func() {
 		err := vm.Shutdown()
 		assert.NoError(err)

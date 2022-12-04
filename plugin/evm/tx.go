@@ -15,16 +15,16 @@ import (
 	"github.com/lasthyphen/coreth/core/state"
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/beacongo/chains/atomic"
-	"github.com/lasthyphen/beacongo/codec"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/snow"
-	"github.com/lasthyphen/beacongo/utils"
-	"github.com/lasthyphen/beacongo/utils/crypto"
-	"github.com/lasthyphen/beacongo/utils/hashing"
-	"github.com/lasthyphen/beacongo/utils/wrappers"
-	"github.com/lasthyphen/beacongo/vms/components/verify"
-	"github.com/lasthyphen/beacongo/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodego/chains/atomic"
+	"github.com/lasthyphen/dijetsnodego/codec"
+	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodego/snow"
+	"github.com/lasthyphen/dijetsnodego/utils"
+	"github.com/lasthyphen/dijetsnodego/utils/crypto"
+	"github.com/lasthyphen/dijetsnodego/utils/hashing"
+	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodego/vms/components/verify"
+	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
 )
 
 var (
@@ -94,8 +94,8 @@ type UnsignedTx interface {
 	ID() ids.ID
 	GasUsed(fixedFee bool) (uint64, error)
 	Burned(assetID ids.ID) (uint64, error)
-	UnsignedBytes() []byte
 	Bytes() []byte
+	SignedBytes() []byte
 }
 
 // UnsignedAtomicTx is an unsigned operation that can be atomically accepted

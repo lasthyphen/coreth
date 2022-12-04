@@ -17,32 +17,34 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lasthyphen/coreth/trie"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 
+	"github.com/lasthyphen/coreth/trie"
+
 	"github.com/stretchr/testify/assert"
 
-	"github.com/lasthyphen/beacongo/api/keystore"
-	"github.com/lasthyphen/beacongo/chains/atomic"
-	"github.com/lasthyphen/beacongo/database/manager"
-	"github.com/lasthyphen/beacongo/database/prefixdb"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/snow"
-	"github.com/lasthyphen/beacongo/snow/choices"
-	"github.com/lasthyphen/beacongo/utils/constants"
-	"github.com/lasthyphen/beacongo/utils/crypto"
-	"github.com/lasthyphen/beacongo/utils/formatting"
-	"github.com/lasthyphen/beacongo/utils/hashing"
-	"github.com/lasthyphen/beacongo/utils/logging"
-	"github.com/lasthyphen/beacongo/utils/units"
-	"github.com/lasthyphen/beacongo/version"
-	"github.com/lasthyphen/beacongo/vms/components/djtx"
-	"github.com/lasthyphen/beacongo/vms/components/chain"
-	"github.com/lasthyphen/beacongo/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodego/api/keystore"
+	"github.com/lasthyphen/dijetsnodego/chains/atomic"
+	"github.com/lasthyphen/dijetsnodego/database/manager"
+	"github.com/lasthyphen/dijetsnodego/database/prefixdb"
+	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodego/snow"
+	"github.com/lasthyphen/dijetsnodego/snow/choices"
+	"github.com/lasthyphen/dijetsnodego/utils/cb58"
+	"github.com/lasthyphen/dijetsnodego/utils/constants"
+	"github.com/lasthyphen/dijetsnodego/utils/crypto"
+	"github.com/lasthyphen/dijetsnodego/utils/formatting"
+	"github.com/lasthyphen/dijetsnodego/utils/hashing"
+	"github.com/lasthyphen/dijetsnodego/utils/logging"
+	"github.com/lasthyphen/dijetsnodego/utils/units"
+	"github.com/lasthyphen/dijetsnodego/version"
+	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
+	"github.com/lasthyphen/dijetsnodego/vms/components/chain"
+	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
 
-	engCommon "github.com/lasthyphen/beacongo/snow/engine/common"
+	engCommon "github.com/lasthyphen/dijetsnodego/snow/engine/common"
 
 	"github.com/lasthyphen/coreth/consensus/dummy"
 	"github.com/lasthyphen/coreth/core"
@@ -72,7 +74,15 @@ var (
 	genesisJSONApricotPhase2 = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
 	genesisJSONApricotPhase3 = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0,\"apricotPhase3BlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
 	genesisJSONApricotPhase4 = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0,\"apricotPhase3BlockTimestamp\":0,\"apricotPhase4BlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
-	genesisJSONApricotPhase5 = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0,\"apricotPhase3BlockTimestamp\":0,\"apricotPhase4BlockTimestamp\":0, \"apricotPhase5BlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+	genesisJSONApricotPhase5 = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0,\"apricotPhase3BlockTimestamp\":0,\"apricotPhase4BlockTimestamp\":0,\"apricotPhase5BlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+
+	genesisJSONApricotPhasePre6  = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0,\"apricotPhase3BlockTimestamp\":0,\"apricotPhase4BlockTimestamp\":0,\"apricotPhase5BlockTimestamp\":0,\"apricotPhasePre6BlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+	genesisJSONApricotPhase6     = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0,\"apricotPhase3BlockTimestamp\":0,\"apricotPhase4BlockTimestamp\":0,\"apricotPhase5BlockTimestamp\":0,\"apricotPhasePre6BlockTimestamp\":0,\"apricotPhase6BlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+	genesisJSONApricotPhasePost6 = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0,\"apricotPhase3BlockTimestamp\":0,\"apricotPhase4BlockTimestamp\":0,\"apricotPhase5BlockTimestamp\":0,\"apricotPhasePre6BlockTimestamp\":0,\"apricotPhase6BlockTimestamp\":0,\"apricotPhasePost6BlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+
+	genesisJSONBlueberry  = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0,\"apricotPhase3BlockTimestamp\":0,\"apricotPhase4BlockTimestamp\":0,\"apricotPhase5BlockTimestamp\":0,\"apricotPhasePre6BlockTimestamp\":0,\"apricotPhase6BlockTimestamp\":0,\"apricotPhasePost6BlockTimestamp\":0,\"blueberryBlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+	genesisJSONClementine = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0,\"apricotPhase3BlockTimestamp\":0,\"apricotPhase4BlockTimestamp\":0,\"apricotPhase5BlockTimestamp\":0,\"apricotPhasePre6BlockTimestamp\":0,\"apricotPhase6BlockTimestamp\":0,\"apricotPhasePost6BlockTimestamp\":0,\"blueberryBlockTimestamp\":0,\"clementineBlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+	genesisJSONLatest     = genesisJSONBlueberry // TODO: update to Clementine
 
 	apricotRulesPhase0 = params.Rules{}
 	apricotRulesPhase1 = params.Rules{IsApricotPhase1: true}
@@ -80,6 +90,9 @@ var (
 	apricotRulesPhase3 = params.Rules{IsApricotPhase1: true, IsApricotPhase2: true, IsApricotPhase3: true}
 	apricotRulesPhase4 = params.Rules{IsApricotPhase1: true, IsApricotPhase2: true, IsApricotPhase3: true, IsApricotPhase4: true}
 	apricotRulesPhase5 = params.Rules{IsApricotPhase1: true, IsApricotPhase2: true, IsApricotPhase3: true, IsApricotPhase4: true, IsApricotPhase5: true}
+	apricotRulesPhase6 = params.Rules{IsApricotPhase1: true, IsApricotPhase2: true, IsApricotPhase3: true, IsApricotPhase4: true, IsApricotPhase5: true, IsApricotPhasePre6: true, IsApricotPhase6: true, IsApricotPhasePost6: true}
+	blueberryRules     = params.Rules{IsApricotPhase1: true, IsApricotPhase2: true, IsApricotPhase3: true, IsApricotPhase4: true, IsApricotPhase5: true, IsApricotPhasePre6: true, IsApricotPhase6: true, IsApricotPhasePost6: true, IsBlueberry: true}
+	// clementineRules    = params.Rules{IsApricotPhase1: true, IsApricotPhase2: true, IsApricotPhase3: true, IsApricotPhase4: true, IsApricotPhase5: true, IsApricotPhasePre6: true, IsApricotPhase6: true, IsApricotPhasePost6: true, IsBlueberry: true, IsClementine: true}
 )
 
 func init() {
@@ -91,7 +104,7 @@ func init() {
 		"2MMvUMsxx6zsHSNXJdFD8yc5XkancvwyKPwpw4xUK3TCGDuNBY",
 		"cxb7KpGWhDMALTjNNSJ7UQkkomPesyWAPUaWRGdyeBNzR6f35",
 	} {
-		b, _ = formatting.Decode(formatting.CB58, key)
+		b, _ = cb58.Decode(key)
 		pk, _ := factory.ToPrivateKey(b)
 		secpKey := pk.(*crypto.PrivateKeySECP256K1R)
 		testKeys = append(testKeys, secpKey)
@@ -99,8 +112,6 @@ func init() {
 		testShortIDAddrs = append(testShortIDAddrs, pk.PublicKey().Address())
 	}
 
-	minBlockTime = time.Millisecond
-	maxBlockTime = time.Millisecond
 	minBlockTimeAP4 = time.Millisecond
 }
 
@@ -125,6 +136,7 @@ func BuildGenesisTest(t *testing.T, genesisJSON string) []byte {
 
 func NewContext() *snow.Context {
 	ctx := snow.DefaultContextTest()
+	ctx.NodeID = ids.GenerateTestNodeID()
 	ctx.NetworkID = testNetworkID
 	ctx.ChainID = testCChainID
 	ctx.DJTXAssetID = testDjtxAssetID
@@ -157,6 +169,8 @@ func (sn *snLookup) SubnetID(chainID ids.ID) (ids.ID, error) {
 	return subnetID, nil
 }
 
+// setupGenesis sets up the genesis
+// If [genesisJSON] is empty, defaults to using [genesisJSONLatest]
 func setupGenesis(t *testing.T,
 	genesisJSON string,
 ) (*snow.Context,
@@ -164,20 +178,33 @@ func setupGenesis(t *testing.T,
 	[]byte,
 	chan engCommon.Message,
 	*atomic.Memory) {
+	if len(genesisJSON) == 0 {
+		genesisJSON = genesisJSONLatest
+	}
 	genesisBytes := BuildGenesisTest(t, genesisJSON)
 	ctx := NewContext()
 
-	baseDBManager := manager.NewMemDB(version.NewDefaultVersion(1, 4, 5))
+	baseDBManager := manager.NewMemDB(&version.Semantic{
+		Major: 1,
+		Minor: 4,
+		Patch: 5,
+	})
 
-	m := &atomic.Memory{}
-	m.Initialize(logging.NoLog{}, prefixdb.New([]byte{0}, baseDBManager.Current().Database))
+	m := atomic.NewMemory(prefixdb.New([]byte{0}, baseDBManager.Current().Database))
 	ctx.SharedMemory = m.NewSharedMemory(ctx.ChainID)
 
 	// NB: this lock is intentionally left locked when this function returns.
 	// The caller of this function is responsible for unlocking.
 	ctx.Lock.Lock()
 
-	userKeystore := keystore.New(logging.NoLog{}, manager.NewMemDB(version.NewDefaultVersion(1, 4, 5)))
+	userKeystore := keystore.New(
+		logging.NoLog{},
+		manager.NewMemDB(&version.Semantic{
+			Major: 1,
+			Minor: 4,
+			Patch: 5,
+		}),
+	)
 	if err := userKeystore.CreateUser(username, password); err != nil {
 		t.Fatal(err)
 	}
@@ -190,6 +217,7 @@ func setupGenesis(t *testing.T,
 
 // GenesisVM creates a VM instance with the genesis test bytes and returns
 // the channel use to send messages to the engine, the vm, and atomic memory
+// If [genesisJSON] is empty, defaults to using [genesisJSONLatest]
 func GenesisVM(t *testing.T,
 	finishBootstrapping bool,
 	genesisJSON string,
@@ -201,7 +229,7 @@ func GenesisVM(t *testing.T,
 	*engCommon.SenderTest) {
 	vm := &VM{}
 	ctx, dbManager, genesisBytes, issuer, m := setupGenesis(t, genesisJSON)
-	appSender := &engCommon.SenderTest{}
+	appSender := &engCommon.SenderTest{T: t}
 	appSender.CantSendAppGossip = true
 	appSender.SendAppGossipF = func([]byte) error { return nil }
 	if err := vm.Initialize(
@@ -262,6 +290,7 @@ func addUTXO(sharedMemory *atomic.Memory, ctx *snow.Context, txID ids.ID, index 
 
 // GenesisVMWithUTXOs creates a GenesisVM and generates UTXOs in the X-Chain Shared Memory containing DJTX based on the [utxos] map
 // Generates UTXOIDs by using a hash of the address in the [utxos] map such that the UTXOs will be generated deterministically.
+// If [genesisJSON] is empty, defaults to using [genesisJSONLatest]
 func GenesisVMWithUTXOs(t *testing.T, finishBootstrapping bool, genesisJSON string, configJSON string, upgradeJSON string, utxos map[ids.ShortID]uint64) (chan engCommon.Message, *VM, manager.Manager, *atomic.Memory, *engCommon.SenderTest) {
 	issuer, vm, dbManager, sharedMemory, sender := GenesisVM(t, finishBootstrapping, genesisJSON, configJSON, upgradeJSON)
 	for addr, djtxAmount := range utxos {
@@ -279,9 +308,9 @@ func GenesisVMWithUTXOs(t *testing.T, finishBootstrapping bool, genesisJSON stri
 
 func TestVMConfig(t *testing.T) {
 	txFeeCap := float64(11)
-	enabledEthAPIs := []string{"internal-private-debug"}
+	enabledEthAPIs := []string{"debug"}
 	configJSON := fmt.Sprintf("{\"rpc-tx-fee-cap\": %g,\"eth-apis\": %s}", txFeeCap, fmt.Sprintf("[%q]", enabledEthAPIs[0]))
-	_, vm, _, _, _ := GenesisVM(t, false, genesisJSONApricotPhase0, configJSON, "")
+	_, vm, _, _, _ := GenesisVM(t, false, "", configJSON, "")
 	assert.Equal(t, vm.config.RPCTxFeeCap, txFeeCap, "Tx Fee Cap should be set")
 	assert.Equal(t, vm.config.EthAPIs(), enabledEthAPIs, "EnabledEthAPIs should be set")
 	assert.NoError(t, vm.Shutdown())
@@ -289,9 +318,9 @@ func TestVMConfig(t *testing.T) {
 
 func TestVMConfigDefaults(t *testing.T) {
 	txFeeCap := float64(11)
-	enabledEthAPIs := []string{"internal-private-debug"}
+	enabledEthAPIs := []string{"debug"}
 	configJSON := fmt.Sprintf("{\"rpc-tx-fee-cap\": %g,\"eth-apis\": %s}", txFeeCap, fmt.Sprintf("[%q]", enabledEthAPIs[0]))
-	_, vm, _, _, _ := GenesisVM(t, false, genesisJSONApricotPhase0, configJSON, "")
+	_, vm, _, _, _ := GenesisVM(t, false, "", configJSON, "")
 
 	var vmConfig Config
 	vmConfig.SetDefaults()
@@ -302,7 +331,7 @@ func TestVMConfigDefaults(t *testing.T) {
 }
 
 func TestVMNilConfig(t *testing.T) {
-	_, vm, _, _, _ := GenesisVM(t, false, genesisJSONApricotPhase0, "", "")
+	_, vm, _, _, _ := GenesisVM(t, false, "", "", "")
 
 	// VM Config should match defaults if no config is passed in
 	var vmConfig Config
@@ -315,7 +344,7 @@ func TestVMContinuosProfiler(t *testing.T) {
 	profilerDir := t.TempDir()
 	profilerFrequency := 500 * time.Millisecond
 	configJSON := fmt.Sprintf("{\"continuous-profiler-dir\": %q,\"continuous-profiler-frequency\": \"500ms\"}", profilerDir)
-	_, vm, _, _, _ := GenesisVM(t, false, genesisJSONApricotPhase0, configJSON, "")
+	_, vm, _, _, _ := GenesisVM(t, false, "", configJSON, "")
 	assert.Equal(t, vm.config.ContinuousProfilerDir, profilerDir, "profiler dir should be set")
 	assert.Equal(t, vm.config.ContinuousProfilerFrequency.Duration, profilerFrequency, "profiler frequency should be set")
 
@@ -366,12 +395,37 @@ func TestVMUpgrades(t *testing.T) {
 			genesis:          genesisJSONApricotPhase5,
 			expectedGasPrice: big.NewInt(0),
 		},
+		{
+			name:             "Apricot Phase Pre 6",
+			genesis:          genesisJSONApricotPhasePre6,
+			expectedGasPrice: big.NewInt(0),
+		},
+		{
+			name:             "Apricot Phase 6",
+			genesis:          genesisJSONApricotPhase6,
+			expectedGasPrice: big.NewInt(0),
+		},
+		{
+			name:             "Apricot Phase Post 6",
+			genesis:          genesisJSONApricotPhasePost6,
+			expectedGasPrice: big.NewInt(0),
+		},
+		{
+			name:             "Blueberry",
+			genesis:          genesisJSONBlueberry,
+			expectedGasPrice: big.NewInt(0),
+		},
+		{
+			name:             "Clementine",
+			genesis:          genesisJSONClementine,
+			expectedGasPrice: big.NewInt(0),
+		},
 	}
 	for _, test := range genesisTests {
 		t.Run(test.name, func(t *testing.T) {
 			_, vm, _, _, _ := GenesisVM(t, true, test.genesis, "", "")
 
-			if gasPrice := vm.chain.GetTxPool().GasPrice(); gasPrice.Cmp(test.expectedGasPrice) != 0 {
+			if gasPrice := vm.txPool.GasPrice(); gasPrice.Cmp(test.expectedGasPrice) != 0 {
 				t.Fatalf("Expected pool gas price to be %d but found %d", test.expectedGasPrice, gasPrice)
 			}
 			defer func() {
@@ -545,14 +599,9 @@ func TestBuildEthTxBlock(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan := make(chan core.NewTxPoolReorgEvent, 1)
-	vm.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan)
+	vm.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan)
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	importTx, err := vm.newImportTx(vm.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm.newImportTx(vm.ctx.XChainID, testEthAddrs[0], initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -591,14 +640,14 @@ func TestBuildEthTxBlock(t *testing.T) {
 
 	txs := make([]*types.Transaction, 10)
 	for i := 0; i < 10; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), testEthAddrs[0], big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), testKeys[0].ToECDSA())
 		if err != nil {
 			t.Fatal(err)
 		}
 		txs[i] = signedTx
 	}
-	errs := vm.chain.AddRemoteTxsSync(txs)
+	errs := vm.txPool.AddRemotesSync(txs)
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add tx at index %d: %s", i, err)
@@ -642,7 +691,7 @@ func TestBuildEthTxBlock(t *testing.T) {
 	}
 
 	ethBlk1 := blk1.(*chain.BlockWrapper).Block.(*Block).ethBlock
-	if ethBlk1Root := ethBlk1.Root(); !vm.chain.BlockChain().HasState(ethBlk1Root) {
+	if ethBlk1Root := ethBlk1.Root(); !vm.blockChain.HasState(ethBlk1Root) {
 		t.Fatalf("Expected blk1 state root to not yet be pruned after blk2 was accepted because of tip buffer")
 	}
 
@@ -684,13 +733,13 @@ func TestBuildEthTxBlock(t *testing.T) {
 	}
 
 	// State root should not have been committed and discarded on restart
-	if ethBlk1Root := ethBlk1.Root(); restartedVM.chain.BlockChain().HasState(ethBlk1Root) {
+	if ethBlk1Root := ethBlk1.Root(); restartedVM.blockChain.HasState(ethBlk1Root) {
 		t.Fatalf("Expected blk1 state root to be pruned after blk2 was accepted on top of it in pruning mode")
 	}
 
 	// State root should be committed when accepted tip on shutdown
 	ethBlk2 := blk2.(*chain.BlockWrapper).Block.(*Block).ethBlock
-	if ethBlk2Root := ethBlk2.Root(); !restartedVM.chain.BlockChain().HasState(ethBlk2Root) {
+	if ethBlk2Root := ethBlk2.Root(); !restartedVM.blockChain.HasState(ethBlk2Root) {
 		t.Fatalf("Expected blk2 state root to not be pruned after shutdown (last accepted tip should be committed)")
 	}
 }
@@ -709,11 +758,6 @@ func testConflictingImportTxs(t *testing.T, genesis string) {
 		}
 	}()
 
-	conflictKey, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	importTxs := make([]*Tx, 0, 3)
 	conflictTxs := make([]*Tx, 0, 3)
 	for i, key := range testKeys {
@@ -723,7 +767,8 @@ func testConflictingImportTxs(t *testing.T, genesis string) {
 		}
 		importTxs = append(importTxs, importTx)
 
-		conflictTx, err := vm.newImportTx(vm.ctx.XChainID, conflictKey.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{key})
+		conflictAddr := testEthAddrs[(i+1)%len(testEthAddrs)]
+		conflictTx, err := vm.newImportTx(vm.ctx.XChainID, conflictAddr, initialBaseFee, []*crypto.PrivateKeySECP256K1R{key})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1021,11 +1066,14 @@ func TestConflictingImportTxsAcrossBlocks(t *testing.T) {
 // then calling SetPreference on block B (when it becomes preferred)
 // and the head of a longer chain (block D) does not corrupt the
 // canonical chain.
-//  A
+//
+//	A
+//
 // / \
 // B  C
-//    |
-//    D
+//
+//	|
+//	D
 func TestSetPreferenceRace(t *testing.T) {
 	// Create two VMs which will agree on block A and then
 	// build the two distinct preferred chains above
@@ -1048,16 +1096,11 @@ func TestSetPreferenceRace(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan1 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm1.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan1)
+	vm1.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan1)
 	newTxPoolHeadChan2 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm2.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan2)
+	vm2.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan2)
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, testEthAddrs[1], initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1119,8 +1162,8 @@ func TestSetPreferenceRace(t *testing.T) {
 	// and to be split into two separate blocks on VM2
 	txs := make([]*types.Transaction, 10)
 	for i := 0; i < 10; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), testEthAddrs[1], big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), testKeys[1].ToECDSA())
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1130,7 +1173,7 @@ func TestSetPreferenceRace(t *testing.T) {
 	var errs []error
 
 	// Add the remote transactions, build the block, and set VM1's preference for block A
-	errs = vm1.chain.AddRemoteTxsSync(txs)
+	errs = vm1.txPool.AddRemotesSync(txs)
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM1 at index %d: %s", i, err)
@@ -1159,7 +1202,7 @@ func TestSetPreferenceRace(t *testing.T) {
 	// Split the transactions over two blocks, and set VM2's preference to them in sequence
 	// after building each block
 	// Block C
-	errs = vm2.chain.AddRemoteTxsSync(txs[0:5])
+	errs = vm2.txPool.AddRemotesSync(txs[0:5])
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM2 at index %d: %s", i, err)
@@ -1190,7 +1233,7 @@ func TestSetPreferenceRace(t *testing.T) {
 	}
 
 	// Block D
-	errs = vm2.chain.AddRemoteTxsSync(txs[5:10])
+	errs = vm2.txPool.AddRemotesSync(txs[5:10])
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM2 at index %d: %s", i, err)
@@ -1263,11 +1306,11 @@ func TestSetPreferenceRace(t *testing.T) {
 
 	log.Info("Validating canonical chain")
 	// Verify the Canonical Chain for Both VMs
-	if err := vm2.chain.ValidateCanonicalChain(); err != nil {
+	if err := vm2.blockChain.ValidateCanonicalChain(); err != nil {
 		t.Fatalf("VM2 failed canonical chain verification due to: %s", err)
 	}
 
-	if err := vm1.chain.ValidateCanonicalChain(); err != nil {
+	if err := vm1.blockChain.ValidateCanonicalChain(); err != nil {
 		t.Fatalf("VM1 failed canonical chain verification due to: %s", err)
 	}
 }
@@ -1299,7 +1342,7 @@ func TestConflictingTransitiveAncestryWithGap(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan := make(chan core.NewTxPoolReorgEvent, 1)
-	vm.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan)
+	vm.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan)
 
 	importTx0A, err := vm.newImportTx(vm.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{key0})
 	if err != nil {
@@ -1342,7 +1385,7 @@ func TestConflictingTransitiveAncestryWithGap(t *testing.T) {
 	}
 
 	// Add the remote transactions, build the block, and set VM1's preference for block A
-	errs := vm.chain.AddRemoteTxsSync([]*types.Transaction{signedTx})
+	errs := vm.txPool.AddRemotesSync([]*types.Transaction{signedTx})
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM1 at index %d: %s", i, err)
@@ -1459,7 +1502,8 @@ func TestBonusBlocksTxs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bonusBlocks.Add(blk.ID())
+	// Make [blk] a bonus block.
+	vm.atomicBackend.(*atomicBackend).bonusBlocks = map[uint64]ids.ID{blk.Height(): blk.ID()}
 
 	// Remove the UTXOs from shared memory, so that non-bonus blocks will fail verification
 	if err := vm.ctx.SharedMemory.Apply(map[ids.ID]*atomic.Requests{vm.ctx.XChainID: {RemoveRequests: [][]byte{inputID[:]}}}); err != nil {
@@ -1499,9 +1543,11 @@ func TestBonusBlocksTxs(t *testing.T) {
 // will not attempt to orphan either when verifying blocks C and D
 // from another VM (which have a common ancestor under the finalized
 // frontier).
-//   A
-//  / \
-// B   C
+//
+//	 A
+//	/ \
+//
+// # B   C
 //
 // verifies block B and C, then Accepts block B. Then we test to ensure
 // that the VM defends against any attempt to set the preference or to
@@ -1527,16 +1573,14 @@ func TestReorgProtection(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan1 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm1.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan1)
+	vm1.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan1)
 	newTxPoolHeadChan2 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm2.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan2)
+	vm2.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan2)
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
+	key := testKeys[0].ToECDSA()
+	address := testEthAddrs[0]
 
-	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1598,8 +1642,8 @@ func TestReorgProtection(t *testing.T) {
 	// and to be split into two separate blocks on VM2
 	txs := make([]*types.Transaction, 10)
 	for i := 0; i < 10; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1609,7 +1653,7 @@ func TestReorgProtection(t *testing.T) {
 	var errs []error
 
 	// Add the remote transactions, build the block, and set VM1's preference for block A
-	errs = vm1.chain.AddRemoteTxsSync(txs)
+	errs = vm1.txPool.AddRemotesSync(txs)
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM1 at index %d: %s", i, err)
@@ -1638,7 +1682,7 @@ func TestReorgProtection(t *testing.T) {
 	// Split the transactions over two blocks, and set VM2's preference to them in sequence
 	// after building each block
 	// Block C
-	errs = vm2.chain.AddRemoteTxsSync(txs[0:5])
+	errs = vm2.txPool.AddRemotesSync(txs[0:5])
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM2 at index %d: %s", i, err)
@@ -1687,8 +1731,10 @@ func TestReorgProtection(t *testing.T) {
 
 // Regression test to ensure that a VM that accepts block C while preferring
 // block B will trigger a reorg.
-//   A
-//  / \
+//
+//	 A
+//	/ \
+//
 // B   C
 func TestNonCanonicalAccept(t *testing.T) {
 	importAmount := uint64(1000000000)
@@ -1710,16 +1756,14 @@ func TestNonCanonicalAccept(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan1 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm1.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan1)
+	vm1.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan1)
 	newTxPoolHeadChan2 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm2.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan2)
+	vm2.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan2)
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
+	key := testKeys[0].ToECDSA()
+	address := testEthAddrs[0]
 
-	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1781,8 +1825,8 @@ func TestNonCanonicalAccept(t *testing.T) {
 	// and to be split into two separate blocks on VM2
 	txs := make([]*types.Transaction, 10)
 	for i := 0; i < 10; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1792,7 +1836,7 @@ func TestNonCanonicalAccept(t *testing.T) {
 	var errs []error
 
 	// Add the remote transactions, build the block, and set VM1's preference for block A
-	errs = vm1.chain.AddRemoteTxsSync(txs)
+	errs = vm1.txPool.AddRemotesSync(txs)
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM1 at index %d: %s", i, err)
@@ -1818,15 +1862,15 @@ func TestNonCanonicalAccept(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vm1.chain.BlockChain().GetVMConfig().AllowUnfinalizedQueries = true
+	vm1.blockChain.GetVMConfig().AllowUnfinalizedQueries = true
 
 	blkBHeight := vm1BlkB.Height()
 	blkBHash := vm1BlkB.(*chain.BlockWrapper).Block.(*Block).ethBlock.Hash()
-	if b := vm1.chain.GetBlockByNumber(blkBHeight); b.Hash() != blkBHash {
+	if b := vm1.blockChain.GetBlockByNumber(blkBHeight); b.Hash() != blkBHash {
 		t.Fatalf("expected block at %d to have hash %s but got %s", blkBHeight, blkBHash.Hex(), b.Hash().Hex())
 	}
 
-	errs = vm2.chain.AddRemoteTxsSync(txs[0:5])
+	errs = vm2.txPool.AddRemotesSync(txs[0:5])
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM2 at index %d: %s", i, err)
@@ -1853,7 +1897,7 @@ func TestNonCanonicalAccept(t *testing.T) {
 	}
 
 	blkCHash := vm1BlkC.(*chain.BlockWrapper).Block.(*Block).ethBlock.Hash()
-	if b := vm1.chain.GetBlockByNumber(blkBHeight); b.Hash() != blkCHash {
+	if b := vm1.blockChain.GetBlockByNumber(blkBHeight); b.Hash() != blkCHash {
 		t.Fatalf("expected block at %d to have hash %s but got %s", blkBHeight, blkCHash.Hex(), b.Hash().Hex())
 	}
 }
@@ -1861,11 +1905,14 @@ func TestNonCanonicalAccept(t *testing.T) {
 // Regression test to ensure that a VM that verifies block B, C, then
 // D (preferring block B) does not trigger a reorg through the re-verification
 // of block C or D.
-//   A
-//  / \
+//
+//	 A
+//	/ \
+//
 // B   C
-//     |
-//     D
+//
+//	|
+//	D
 func TestStickyPreference(t *testing.T) {
 	importAmount := uint64(1000000000)
 	issuer1, vm1, _, _, _ := GenesisVMWithUTXOs(t, true, genesisJSONApricotPhase0, "", "", map[ids.ShortID]uint64{
@@ -1886,16 +1933,14 @@ func TestStickyPreference(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan1 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm1.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan1)
+	vm1.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan1)
 	newTxPoolHeadChan2 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm2.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan2)
+	vm2.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan2)
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
+	key := testKeys[0].ToECDSA()
+	address := testEthAddrs[0]
 
-	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1957,8 +2002,8 @@ func TestStickyPreference(t *testing.T) {
 	// and to be split into two separate blocks on VM2
 	txs := make([]*types.Transaction, 10)
 	for i := 0; i < 10; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1968,7 +2013,7 @@ func TestStickyPreference(t *testing.T) {
 	var errs []error
 
 	// Add the remote transactions, build the block, and set VM1's preference for block A
-	errs = vm1.chain.AddRemoteTxsSync(txs)
+	errs = vm1.txPool.AddRemotesSync(txs)
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM1 at index %d: %s", i, err)
@@ -1994,15 +2039,15 @@ func TestStickyPreference(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vm1.chain.BlockChain().GetVMConfig().AllowUnfinalizedQueries = true
+	vm1.blockChain.GetVMConfig().AllowUnfinalizedQueries = true
 
 	blkBHeight := vm1BlkB.Height()
 	blkBHash := vm1BlkB.(*chain.BlockWrapper).Block.(*Block).ethBlock.Hash()
-	if b := vm1.chain.GetBlockByNumber(blkBHeight); b.Hash() != blkBHash {
+	if b := vm1.blockChain.GetBlockByNumber(blkBHeight); b.Hash() != blkBHash {
 		t.Fatalf("expected block at %d to have hash %s but got %s", blkBHeight, blkBHash.Hex(), b.Hash().Hex())
 	}
 
-	errs = vm2.chain.AddRemoteTxsSync(txs[0:5])
+	errs = vm2.txPool.AddRemotesSync(txs[0:5])
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM2 at index %d: %s", i, err)
@@ -2032,7 +2077,7 @@ func TestStickyPreference(t *testing.T) {
 		t.Fatalf("Expected new block to match")
 	}
 
-	errs = vm2.chain.AddRemoteTxsSync(txs[5:])
+	errs = vm2.txPool.AddRemotesSync(txs[5:])
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM2 at index %d: %s", i, err)
@@ -2066,13 +2111,13 @@ func TestStickyPreference(t *testing.T) {
 	if err := vm1BlkD.Verify(); err != nil {
 		t.Fatalf("Block failed verification on VM1: %s", err)
 	}
-	if b := vm1.chain.GetBlockByNumber(blkBHeight); b.Hash() != blkBHash {
+	if b := vm1.blockChain.GetBlockByNumber(blkBHeight); b.Hash() != blkBHash {
 		t.Fatalf("expected block at %d to have hash %s but got %s", blkBHeight, blkBHash.Hex(), b.Hash().Hex())
 	}
-	if b := vm1.chain.GetBlockByNumber(blkDHeight); b != nil {
+	if b := vm1.blockChain.GetBlockByNumber(blkDHeight); b != nil {
 		t.Fatalf("expected block at %d to be nil but got %s", blkDHeight, b.Hash().Hex())
 	}
-	if b := vm1.chain.BlockChain().CurrentBlock(); b.Hash() != blkBHash {
+	if b := vm1.blockChain.CurrentBlock(); b.Hash() != blkBHash {
 		t.Fatalf("expected current block to have hash %s but got %s", blkBHash.Hex(), b.Hash().Hex())
 	}
 
@@ -2083,13 +2128,13 @@ func TestStickyPreference(t *testing.T) {
 	if err := vm1BlkD.Verify(); err != nil {
 		t.Fatalf("Block failed verification on VM1: %s", err)
 	}
-	if b := vm1.chain.GetBlockByNumber(blkBHeight); b.Hash() != blkBHash {
+	if b := vm1.blockChain.GetBlockByNumber(blkBHeight); b.Hash() != blkBHash {
 		t.Fatalf("expected block at %d to have hash %s but got %s", blkBHeight, blkBHash.Hex(), b.Hash().Hex())
 	}
-	if b := vm1.chain.GetBlockByNumber(blkDHeight); b != nil {
+	if b := vm1.blockChain.GetBlockByNumber(blkDHeight); b != nil {
 		t.Fatalf("expected block at %d to be nil but got %s", blkDHeight, b.Hash().Hex())
 	}
-	if b := vm1.chain.BlockChain().CurrentBlock(); b.Hash() != blkBHash {
+	if b := vm1.blockChain.CurrentBlock(); b.Hash() != blkBHash {
 		t.Fatalf("expected current block to have hash %s but got %s", blkBHash.Hex(), b.Hash().Hex())
 	}
 
@@ -2098,13 +2143,13 @@ func TestStickyPreference(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if b := vm1.chain.GetBlockByNumber(blkBHeight); b.Hash() != blkCHash {
+	if b := vm1.blockChain.GetBlockByNumber(blkBHeight); b.Hash() != blkCHash {
 		t.Fatalf("expected block at %d to have hash %s but got %s", blkBHeight, blkCHash.Hex(), b.Hash().Hex())
 	}
-	if b := vm1.chain.GetBlockByNumber(blkDHeight); b.Hash() != blkDHash {
+	if b := vm1.blockChain.GetBlockByNumber(blkDHeight); b.Hash() != blkDHash {
 		t.Fatalf("expected block at %d to have hash %s but got %s", blkDHeight, blkDHash.Hex(), b.Hash().Hex())
 	}
-	if b := vm1.chain.BlockChain().CurrentBlock(); b.Hash() != blkDHash {
+	if b := vm1.blockChain.CurrentBlock(); b.Hash() != blkDHash {
 		t.Fatalf("expected current block to have hash %s but got %s", blkDHash.Hex(), b.Hash().Hex())
 	}
 
@@ -2122,13 +2167,13 @@ func TestStickyPreference(t *testing.T) {
 	}
 
 	// Ensure queryable after accepting
-	if b := vm1.chain.GetBlockByNumber(blkBHeight); b.Hash() != blkCHash {
+	if b := vm1.blockChain.GetBlockByNumber(blkBHeight); b.Hash() != blkCHash {
 		t.Fatalf("expected block at %d to have hash %s but got %s", blkBHeight, blkCHash.Hex(), b.Hash().Hex())
 	}
-	if b := vm1.chain.GetBlockByNumber(blkDHeight); b.Hash() != blkDHash {
+	if b := vm1.blockChain.GetBlockByNumber(blkDHeight); b.Hash() != blkDHash {
 		t.Fatalf("expected block at %d to have hash %s but got %s", blkDHeight, blkDHash.Hex(), b.Hash().Hex())
 	}
-	if b := vm1.chain.BlockChain().CurrentBlock(); b.Hash() != blkDHash {
+	if b := vm1.blockChain.CurrentBlock(); b.Hash() != blkDHash {
 		t.Fatalf("expected current block to have hash %s but got %s", blkDHash.Hex(), b.Hash().Hex())
 	}
 }
@@ -2136,11 +2181,14 @@ func TestStickyPreference(t *testing.T) {
 // Regression test to ensure that a VM that prefers block B is able to parse
 // block C but unable to parse block D because it names B as an uncle, which
 // are not supported.
-//   A
-//  / \
+//
+//	 A
+//	/ \
+//
 // B   C
-//     |
-//     D
+//
+//	|
+//	D
 func TestUncleBlock(t *testing.T) {
 	importAmount := uint64(1000000000)
 	issuer1, vm1, _, _, _ := GenesisVMWithUTXOs(t, true, genesisJSONApricotPhase0, "", "", map[ids.ShortID]uint64{
@@ -2160,16 +2208,14 @@ func TestUncleBlock(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan1 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm1.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan1)
+	vm1.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan1)
 	newTxPoolHeadChan2 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm2.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan2)
+	vm2.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan2)
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
+	key := testKeys[0].ToECDSA()
+	address := testEthAddrs[0]
 
-	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2229,8 +2275,8 @@ func TestUncleBlock(t *testing.T) {
 
 	txs := make([]*types.Transaction, 10)
 	for i := 0; i < 10; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -2239,7 +2285,7 @@ func TestUncleBlock(t *testing.T) {
 
 	var errs []error
 
-	errs = vm1.chain.AddRemoteTxsSync(txs)
+	errs = vm1.txPool.AddRemotesSync(txs)
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM1 at index %d: %s", i, err)
@@ -2265,7 +2311,7 @@ func TestUncleBlock(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	errs = vm2.chain.AddRemoteTxsSync(txs[0:5])
+	errs = vm2.txPool.AddRemotesSync(txs[0:5])
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM2 at index %d: %s", i, err)
@@ -2295,7 +2341,7 @@ func TestUncleBlock(t *testing.T) {
 		t.Fatalf("Expected new block to match")
 	}
 
-	errs = vm2.chain.AddRemoteTxsSync(txs[5:10])
+	errs = vm2.txPool.AddRemotesSync(txs[5:10])
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM2 at index %d: %s", i, err)
@@ -2323,10 +2369,9 @@ func TestUncleBlock(t *testing.T) {
 		blkDEthBlock.ExtData(),
 		false,
 	)
-	uncleBlock := &Block{
-		vm:       vm2,
-		ethBlock: uncleEthBlock,
-		id:       ids.ID(uncleEthBlock.Hash()),
+	uncleBlock, err := vm2.newBlock(uncleEthBlock)
+	if err != nil {
+		t.Fatal(err)
 	}
 	if err := uncleBlock.Verify(); !errors.Is(err, errUnclesUnsupported) {
 		t.Fatalf("VM2 should have failed with %q but got %q", errUnclesUnsupported, err.Error())
@@ -2353,12 +2398,7 @@ func TestEmptyBlock(t *testing.T) {
 		}
 	}()
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	importTx, err := vm.newImportTx(vm.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm.newImportTx(vm.ctx.XChainID, testEthAddrs[0], initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2391,10 +2431,9 @@ func TestEmptyBlock(t *testing.T) {
 		t.Fatalf("emptyEthBlock should not have any extra data")
 	}
 
-	emptyBlock := &Block{
-		vm:       vm,
-		ethBlock: emptyEthBlock,
-		id:       ids.ID(emptyEthBlock.Hash()),
+	emptyBlock, err := vm.newBlock(emptyEthBlock)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	if _, err := vm.ParseBlock(emptyBlock.Bytes()); !errors.Is(err, errEmptyBlock) {
@@ -2407,11 +2446,14 @@ func TestEmptyBlock(t *testing.T) {
 
 // Regression test to ensure that a VM that verifies block B, C, then
 // D (preferring block B) reorgs when C and then D are accepted.
-//   A
-//  / \
+//
+//	 A
+//	/ \
+//
 // B   C
-//     |
-//     D
+//
+//	|
+//	D
 func TestAcceptReorg(t *testing.T) {
 	importAmount := uint64(1000000000)
 	issuer1, vm1, _, _, _ := GenesisVMWithUTXOs(t, true, genesisJSONApricotPhase0, "", "", map[ids.ShortID]uint64{
@@ -2432,15 +2474,14 @@ func TestAcceptReorg(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan1 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm1.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan1)
+	vm1.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan1)
 	newTxPoolHeadChan2 := make(chan core.NewTxPoolReorgEvent, 1)
-	vm2.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan2)
+	vm2.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan2)
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	key := testKeys[0].ToECDSA()
+	address := testEthAddrs[0]
+
+	importTx, err := vm1.newImportTx(vm1.ctx.XChainID, address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2502,8 +2543,8 @@ func TestAcceptReorg(t *testing.T) {
 	// and to be split into two separate blocks on VM2
 	txs := make([]*types.Transaction, 10)
 	for i := 0; i < 10; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm1.chainID), key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -2512,7 +2553,7 @@ func TestAcceptReorg(t *testing.T) {
 
 	// Add the remote transactions, build the block, and set VM1's preference
 	// for block B
-	errs := vm1.chain.AddRemoteTxsSync(txs)
+	errs := vm1.txPool.AddRemotesSync(txs)
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM1 at index %d: %s", i, err)
@@ -2538,7 +2579,7 @@ func TestAcceptReorg(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	errs = vm2.chain.AddRemoteTxsSync(txs[0:5])
+	errs = vm2.txPool.AddRemotesSync(txs[0:5])
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM2 at index %d: %s", i, err)
@@ -2565,7 +2606,7 @@ func TestAcceptReorg(t *testing.T) {
 		t.Fatalf("Expected new block to match")
 	}
 
-	errs = vm2.chain.AddRemoteTxsSync(txs[5:])
+	errs = vm2.txPool.AddRemotesSync(txs[5:])
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add transaction to VM2 at index %d: %s", i, err)
@@ -2598,7 +2639,7 @@ func TestAcceptReorg(t *testing.T) {
 	}
 
 	blkBHash := vm1BlkB.(*chain.BlockWrapper).Block.(*Block).ethBlock.Hash()
-	if b := vm1.chain.BlockChain().CurrentBlock(); b.Hash() != blkBHash {
+	if b := vm1.blockChain.CurrentBlock(); b.Hash() != blkBHash {
 		t.Fatalf("expected current block to have hash %s but got %s", blkBHash.Hex(), b.Hash().Hex())
 	}
 
@@ -2607,7 +2648,7 @@ func TestAcceptReorg(t *testing.T) {
 	}
 
 	blkCHash := vm1BlkC.(*chain.BlockWrapper).Block.(*Block).ethBlock.Hash()
-	if b := vm1.chain.BlockChain().CurrentBlock(); b.Hash() != blkCHash {
+	if b := vm1.blockChain.CurrentBlock(); b.Hash() != blkCHash {
 		t.Fatalf("expected current block to have hash %s but got %s", blkCHash.Hex(), b.Hash().Hex())
 	}
 	if err := vm1BlkB.Reject(); err != nil {
@@ -2618,7 +2659,7 @@ func TestAcceptReorg(t *testing.T) {
 		t.Fatal(err)
 	}
 	blkDHash := vm1BlkD.(*chain.BlockWrapper).Block.(*Block).ethBlock.Hash()
-	if b := vm1.chain.BlockChain().CurrentBlock(); b.Hash() != blkDHash {
+	if b := vm1.blockChain.CurrentBlock(); b.Hash() != blkDHash {
 		t.Fatalf("expected current block to have hash %s but got %s", blkDHash.Hex(), b.Hash().Hex())
 	}
 }
@@ -2635,12 +2676,7 @@ func TestFutureBlock(t *testing.T) {
 		}
 	}()
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	importTx, err := vm.newImportTx(vm.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm.newImportTx(vm.ctx.XChainID, testEthAddrs[0], initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2674,11 +2710,9 @@ func TestFutureBlock(t *testing.T) {
 		false,
 	)
 
-	futureBlock := &Block{
-		vm:        vm,
-		ethBlock:  modifiedBlock,
-		id:        ids.ID(modifiedBlock.Hash()),
-		atomicTxs: internalBlkA.atomicTxs,
+	futureBlock, err := vm.newBlock(modifiedBlock)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	if err := futureBlock.Verify(); err == nil {
@@ -2702,14 +2736,12 @@ func TestBuildApricotPhase1Block(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan := make(chan core.NewTxPoolReorgEvent, 1)
-	vm.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan)
+	vm.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan)
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
+	key := testKeys[0].ToECDSA()
+	address := testEthAddrs[0]
 
-	importTx, err := vm.newImportTx(vm.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm.newImportTx(vm.ctx.XChainID, address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2748,22 +2780,22 @@ func TestBuildApricotPhase1Block(t *testing.T) {
 
 	txs := make([]*types.Transaction, 10)
 	for i := 0; i < 5; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), key)
 		if err != nil {
 			t.Fatal(err)
 		}
 		txs[i] = signedTx
 	}
 	for i := 5; i < 10; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.ApricotPhase1MinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), address, big.NewInt(10), 21000, big.NewInt(params.ApricotPhase1MinGasPrice), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), key)
 		if err != nil {
 			t.Fatal(err)
 		}
 		txs[i] = signedTx
 	}
-	errs := vm.chain.AddRemoteTxsSync(txs)
+	errs := vm.txPool.AddRemotesSync(txs)
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add tx at index %d: %s", i, err)
@@ -2802,7 +2834,7 @@ func TestBuildApricotPhase1Block(t *testing.T) {
 	}
 
 	// Confirm all txs are present
-	ethBlkTxs := vm.chain.GetBlockByNumber(2).Transactions()
+	ethBlkTxs := vm.blockChain.GetBlockByNumber(2).Transactions()
 	for i, tx := range txs {
 		if len(ethBlkTxs) <= i {
 			t.Fatalf("missing transactions expected: %d but found: %d", len(txs), len(ethBlkTxs))
@@ -2825,12 +2857,7 @@ func TestLastAcceptedBlockNumberAllow(t *testing.T) {
 		}
 	}()
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	importTx, err := vm.newImportTx(vm.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm.newImportTx(vm.ctx.XChainID, testEthAddrs[0], initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2861,10 +2888,10 @@ func TestLastAcceptedBlockNumberAllow(t *testing.T) {
 	blkHeight := blk.Height()
 	blkHash := blk.(*chain.BlockWrapper).Block.(*Block).ethBlock.Hash()
 
-	vm.chain.BlockChain().GetVMConfig().AllowUnfinalizedQueries = true
+	vm.blockChain.GetVMConfig().AllowUnfinalizedQueries = true
 
 	ctx := context.Background()
-	b, err := vm.chain.APIBackend().BlockByNumber(ctx, rpc.BlockNumber(blkHeight))
+	b, err := vm.eth.APIBackend.BlockByNumber(ctx, rpc.BlockNumber(blkHeight))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2872,9 +2899,9 @@ func TestLastAcceptedBlockNumberAllow(t *testing.T) {
 		t.Fatalf("expected block at %d to have hash %s but got %s", blkHeight, blkHash.Hex(), b.Hash().Hex())
 	}
 
-	vm.chain.BlockChain().GetVMConfig().AllowUnfinalizedQueries = false
+	vm.blockChain.GetVMConfig().AllowUnfinalizedQueries = false
 
-	_, err = vm.chain.APIBackend().BlockByNumber(ctx, rpc.BlockNumber(blkHeight))
+	_, err = vm.eth.APIBackend.BlockByNumber(ctx, rpc.BlockNumber(blkHeight))
 	if !errors.Is(err, eth.ErrUnfinalizedData) {
 		t.Fatalf("expected ErrUnfinalizedData but got %s", err.Error())
 	}
@@ -2883,7 +2910,7 @@ func TestLastAcceptedBlockNumberAllow(t *testing.T) {
 		t.Fatalf("VM failed to accept block: %s", err)
 	}
 
-	if b := vm.chain.GetBlockByNumber(blkHeight); b.Hash() != blkHash {
+	if b := vm.blockChain.GetBlockByNumber(blkHeight); b.Hash() != blkHash {
 		t.Fatalf("expected block at %d to have hash %s but got %s", blkHeight, blkHash.Hex(), b.Hash().Hex())
 	}
 }
@@ -2926,6 +2953,10 @@ func TestReissueAtomicTx(t *testing.T) {
 
 	if status := blkA.Status(); status != choices.Processing {
 		t.Fatalf("Expected status of built block to be %s, but found %s", choices.Processing, status)
+	}
+
+	if err := blkA.Verify(); err != nil {
+		t.Fatal(err)
 	}
 
 	if err := vm.SetPreference(blkA.ID()); err != nil {
@@ -3086,7 +3117,7 @@ func TestBuildInvalidBlockHead(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	currentBlock := vm.chain.BlockChain().CurrentBlock()
+	currentBlock := vm.blockChain.CurrentBlock()
 
 	// Verify that the transaction fails verification when attempting to issue
 	// it into the atomic mempool.
@@ -3104,7 +3135,7 @@ func TestBuildInvalidBlockHead(t *testing.T) {
 		t.Fatalf("Unexpectedly created a block")
 	}
 
-	newCurrentBlock := vm.chain.BlockChain().CurrentBlock()
+	newCurrentBlock := vm.blockChain.CurrentBlock()
 
 	if currentBlock.Hash() != newCurrentBlock.Hash() {
 		t.Fatal("current block changed")
@@ -3137,7 +3168,7 @@ func TestConfigureLogLevel(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			vm := &VM{}
 			ctx, dbManager, genesisBytes, issuer, _ := setupGenesis(t, test.genesisJSON)
-			appSender := &engCommon.SenderTest{}
+			appSender := &engCommon.SenderTest{T: t}
 			appSender.CantSendAppGossip = true
 			appSender.SendAppGossipF = func([]byte) error { return nil }
 			err := vm.Initialize(
@@ -3196,12 +3227,10 @@ func TestBuildApricotPhase4Block(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan := make(chan core.NewTxPoolReorgEvent, 1)
-	vm.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan)
+	vm.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan)
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
+	key := testKeys[0].ToECDSA()
+	address := testEthAddrs[0]
 
 	importAmount := uint64(1000000000)
 	utxoID := djtx.UTXOID{TxID: ids.GenerateTestID()}
@@ -3234,7 +3263,7 @@ func TestBuildApricotPhase4Block(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	importTx, err := vm.newImportTx(vm.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm.newImportTx(vm.ctx.XChainID, address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -3288,22 +3317,22 @@ func TestBuildApricotPhase4Block(t *testing.T) {
 
 	txs := make([]*types.Transaction, 10)
 	for i := 0; i < 5; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), key)
 		if err != nil {
 			t.Fatal(err)
 		}
 		txs[i] = signedTx
 	}
 	for i := 5; i < 10; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.ApricotPhase1MinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), address, big.NewInt(10), 21000, big.NewInt(params.ApricotPhase1MinGasPrice), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), key)
 		if err != nil {
 			t.Fatal(err)
 		}
 		txs[i] = signedTx
 	}
-	errs := vm.chain.AddRemoteTxs(txs)
+	errs := vm.txPool.AddRemotes(txs)
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add tx at index %d: %s", i, err)
@@ -3357,7 +3386,7 @@ func TestBuildApricotPhase4Block(t *testing.T) {
 	}
 
 	// Confirm all txs are present
-	ethBlkTxs := vm.chain.GetBlockByNumber(2).Transactions()
+	ethBlkTxs := vm.blockChain.GetBlockByNumber(2).Transactions()
 	for i, tx := range txs {
 		if len(ethBlkTxs) <= i {
 			t.Fatalf("missing transactions expected: %d but found: %d", len(txs), len(ethBlkTxs))
@@ -3380,12 +3409,10 @@ func TestBuildApricotPhase5Block(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan := make(chan core.NewTxPoolReorgEvent, 1)
-	vm.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan)
+	vm.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan)
 
-	key, err := accountKeystore.NewKey(rand.Reader)
-	if err != nil {
-		t.Fatal(err)
-	}
+	key := testKeys[0].ToECDSA()
+	address := testEthAddrs[0]
 
 	importAmount := uint64(1000000000)
 	utxoID := djtx.UTXOID{TxID: ids.GenerateTestID()}
@@ -3418,7 +3445,7 @@ func TestBuildApricotPhase5Block(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	importTx, err := vm.newImportTx(vm.ctx.XChainID, key.Address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
+	importTx, err := vm.newImportTx(vm.ctx.XChainID, address, initialBaseFee, []*crypto.PrivateKeySECP256K1R{testKeys[0]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -3472,14 +3499,14 @@ func TestBuildApricotPhase5Block(t *testing.T) {
 
 	txs := make([]*types.Transaction, 10)
 	for i := 0; i < 10; i++ {
-		tx := types.NewTransaction(uint64(i), key.Address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice*3), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), key.PrivateKey)
+		tx := types.NewTransaction(uint64(i), address, big.NewInt(10), 21000, big.NewInt(params.LaunchMinGasPrice*3), nil)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(vm.chainID), key)
 		if err != nil {
 			t.Fatal(err)
 		}
 		txs[i] = signedTx
 	}
-	errs := vm.chain.AddRemoteTxs(txs)
+	errs := vm.txPool.AddRemotes(txs)
 	for i, err := range errs {
 		if err != nil {
 			t.Fatalf("Failed to add tx at index %d: %s", i, err)
@@ -3533,7 +3560,7 @@ func TestBuildApricotPhase5Block(t *testing.T) {
 	}
 
 	// Confirm all txs are present
-	ethBlkTxs := vm.chain.GetBlockByNumber(2).Transactions()
+	ethBlkTxs := vm.blockChain.GetBlockByNumber(2).Transactions()
 	for i, tx := range txs {
 		if len(ethBlkTxs) <= i {
 			t.Fatalf("missing transactions expected: %d but found: %d", len(txs), len(ethBlkTxs))
@@ -3557,7 +3584,7 @@ func TestConsecutiveAtomicTransactionsRevertSnapshot(t *testing.T) {
 	}()
 
 	newTxPoolHeadChan := make(chan core.NewTxPoolReorgEvent, 1)
-	vm.chain.GetTxPool().SubscribeNewReorgEvent(newTxPoolHeadChan)
+	vm.txPool.SubscribeNewReorgEvent(newTxPoolHeadChan)
 
 	// Create three conflicting import transactions
 	importTxs := createImportTxOptions(t, vm, sharedMemory)
@@ -3788,7 +3815,7 @@ func TestExtraStateChangeAtomicGasLimitExceeded(t *testing.T) {
 		true,
 	)
 
-	state, err := vm2.chain.CurrentState()
+	state, err := vm2.blockChain.State()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -3800,10 +3827,8 @@ func TestExtraStateChangeAtomicGasLimitExceeded(t *testing.T) {
 }
 
 func TestGetAtomicRepositoryRepairHeights(t *testing.T) {
-	mainnetHeights := getAtomicRepositoryRepairHeights(params.AvalancheMainnetChainID)
+	mainnetHeights := getAtomicRepositoryRepairHeights(bonusBlockMainnetHeights, canonicalBlockMainnetHeights)
 	assert.Len(t, mainnetHeights, 76)
 	sorted := sort.SliceIsSorted(mainnetHeights, func(i, j int) bool { return mainnetHeights[i] < mainnetHeights[j] })
 	assert.True(t, sorted)
-	testnetHeights := getAtomicRepositoryRepairHeights(params.AvalancheFujiChainID)
-	assert.Empty(t, testnetHeights)
 }

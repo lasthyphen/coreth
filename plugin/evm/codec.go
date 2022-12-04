@@ -6,10 +6,10 @@ package evm
 import (
 	"fmt"
 
-	"github.com/lasthyphen/beacongo/codec"
-	"github.com/lasthyphen/beacongo/codec/linearcodec"
-	"github.com/lasthyphen/beacongo/utils/wrappers"
-	"github.com/lasthyphen/beacongo/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodego/codec"
+	"github.com/lasthyphen/dijetsnodego/codec/linearcodec"
+	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
 )
 
 // Codec does serialization and deserialization

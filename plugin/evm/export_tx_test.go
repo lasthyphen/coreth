@@ -8,14 +8,14 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/lasthyphen/beacongo/chains/atomic"
-	"github.com/lasthyphen/beacongo/ids"
-	engCommon "github.com/lasthyphen/beacongo/snow/engine/common"
-	"github.com/lasthyphen/beacongo/utils/constants"
-	"github.com/lasthyphen/beacongo/utils/crypto"
-	"github.com/lasthyphen/beacongo/utils/units"
-	"github.com/lasthyphen/beacongo/vms/components/djtx"
-	"github.com/lasthyphen/beacongo/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodego/chains/atomic"
+	"github.com/lasthyphen/dijetsnodego/ids"
+	engCommon "github.com/lasthyphen/dijetsnodego/snow/engine/common"
+	"github.com/lasthyphen/dijetsnodego/utils/constants"
+	"github.com/lasthyphen/dijetsnodego/utils/crypto"
+	"github.com/lasthyphen/dijetsnodego/utils/units"
+	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
+	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
 	"github.com/lasthyphen/coreth/params"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -397,7 +397,7 @@ func TestExportTxEVMStateTransfer(t *testing.T) {
 				Ins: test.tx,
 			}
 
-			stateDB, err := vm.chain.CurrentState()
+			stateDB, err := vm.blockChain.State()
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1069,13 +1069,6 @@ func TestExportTxAccept(t *testing.T) {
 	}
 }
 
-func TestExportTxVerifyNil(t *testing.T) {
-	var exportTx *UnsignedExportTx
-	if err := exportTx.Verify(NewContext(), apricotRulesPhase0); err == nil {
-		t.Fatal("Verify should have failed due to nil transaction")
-	}
-}
-
 func TestExportTxVerify(t *testing.T) {
 	var exportAmount uint64 = 10000000
 	exportTx := &UnsignedExportTx{
@@ -1130,82 +1123,242 @@ func TestExportTxVerify(t *testing.T) {
 	SortEVMInputsAndSigners(exportTx.Ins, emptySigners)
 
 	ctx := NewContext()
-	// Test Valid Export Tx
-	if err := exportTx.Verify(ctx, apricotRulesPhase1); err != nil {
-		t.Fatalf("Failed to verify valid ExportTx: %s", err)
-	}
-	exportTx.NetworkID = testNetworkID + 1
-	// Test Incorrect Network ID Errors
-	if err := exportTx.Verify(ctx, apricotRulesPhase1); err == nil {
-		t.Fatal("ExportTx should have failed verification due to incorrect network ID")
-	}
 
-	exportTx.NetworkID = testNetworkID
-	exportTx.BlockchainID = nonExistentID
-	// Test Incorrect Blockchain ID Errors
-	if err := exportTx.Verify(ctx, apricotRulesPhase1); err == nil {
-		t.Fatal("ExportTx should have failed verification due to incorrect blockchain ID")
-	}
-
-	exportTx.BlockchainID = testCChainID
-	exportTx.DestinationChain = nonExistentID
-	// Test Incorrect Destination Chain ID Errors
-	if err := exportTx.Verify(ctx, apricotRulesPhase1); err == nil {
-		t.Fatal("ExportTx should have failed verification due to incorrect destination chain")
-	}
-
-	exportTx.DestinationChain = testXChainID
-	exportedOuts := exportTx.ExportedOutputs
-	exportTx.ExportedOutputs = nil
-	evmInputs := exportTx.Ins
-	// Test No Exported Outputs Errors
-	if err := exportTx.Verify(ctx, apricotRulesPhase1); err == nil {
-		t.Fatal("ExportTx should have failed verification due to no exported outputs")
-	}
-
-	exportTx.ExportedOutputs = []*djtx.TransferableOutput{exportedOuts[1], exportedOuts[0]}
-	// Test Unsorted outputs Errors
-	if err := exportTx.Verify(ctx, apricotRulesPhase1); err == nil {
-		t.Fatal("ExportTx should have failed verification due to no unsorted exported outputs")
-	}
-
-	exportTx.ExportedOutputs = []*djtx.TransferableOutput{exportedOuts[0], nil}
-	// Test invalid exported output
-	if err := exportTx.Verify(ctx, apricotRulesPhase1); err == nil {
-		t.Fatal("ExportTx should have failed verification due to invalid output")
-	}
-
-	exportTx.ExportedOutputs = []*djtx.TransferableOutput{exportedOuts[0], exportedOuts[1]}
-	exportTx.Ins = []EVMInput{evmInputs[1], evmInputs[0]}
-	// Test unsorted EVM Inputs passes before AP1
-	if err := exportTx.Verify(ctx, apricotRulesPhase0); err != nil {
-		t.Fatalf("ExportTx should have passed verification before AP1, but failed due to %s", err)
-	}
-	// Test unsorted EVM Inputs fails after AP1
-	if err := exportTx.Verify(ctx, apricotRulesPhase1); err == nil {
-		t.Fatal("ExportTx should have failed verification due to unsorted EVM Inputs")
-	}
-	exportTx.Ins = []EVMInput{
-		{
-			Address: testEthAddrs[0],
-			Amount:  0,
-			AssetID: testDjtxAssetID,
-			Nonce:   0,
+	tests := map[string]atomicTxVerifyTest{
+		"nil tx": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				return (*UnsignedExportTx)(nil)
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase0,
+			expectedErr: errNilTx.Error(),
+		},
+		"valid export tx": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				return exportTx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase0,
+			expectedErr: "",
+		},
+		"valid export tx blueberry": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				return exportTx
+			},
+			ctx:         ctx,
+			rules:       blueberryRules,
+			expectedErr: "",
+		},
+		"incorrect networkID": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.NetworkID++
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase0,
+			expectedErr: errWrongNetworkID.Error(),
+		},
+		"incorrect blockchainID": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.BlockchainID = nonExistentID
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase0,
+			expectedErr: errWrongBlockchainID.Error(),
+		},
+		"incorrect destination chain": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.DestinationChain = nonExistentID
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase0,
+			expectedErr: errWrongChainID.Error(), // TODO make this error more specific to destination not just chainID
+		},
+		"no exported outputs": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.ExportedOutputs = nil
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase0,
+			expectedErr: errNoExportOutputs.Error(),
+		},
+		"unsorted outputs": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.ExportedOutputs = []*djtx.TransferableOutput{
+					tx.ExportedOutputs[1],
+					tx.ExportedOutputs[0],
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase0,
+			expectedErr: errOutputsNotSorted.Error(),
+		},
+		"invalid exported output": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.ExportedOutputs = []*djtx.TransferableOutput{tx.ExportedOutputs[0], nil}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase0,
+			expectedErr: "nil transferable output is not valid",
+		},
+		"unsorted EVM inputs before AP1": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.Ins = []EVMInput{
+					tx.Ins[1],
+					tx.Ins[0],
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase0,
+			expectedErr: "",
+		},
+		"unsorted EVM inputs after AP1": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.Ins = []EVMInput{
+					tx.Ins[1],
+					tx.Ins[0],
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase1,
+			expectedErr: errInputsNotSortedUnique.Error(),
+		},
+		"EVM input with amount 0": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.Ins = []EVMInput{
+					{
+						Address: testEthAddrs[0],
+						Amount:  0,
+						AssetID: testDjtxAssetID,
+						Nonce:   0,
+					},
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase0,
+			expectedErr: errNoValueInput.Error(),
+		},
+		"non-unique EVM input before AP1": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.Ins = []EVMInput{tx.Ins[0], tx.Ins[0]}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase0,
+			expectedErr: "",
+		},
+		"non-unique EVM input after AP1": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.Ins = []EVMInput{tx.Ins[0], tx.Ins[0]}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase1,
+			expectedErr: errInputsNotSortedUnique.Error(),
+		},
+		"non-DJTX input Apricot Phase 6": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.Ins = []EVMInput{
+					{
+						Address: testEthAddrs[0],
+						Amount:  1,
+						AssetID: nonExistentID,
+						Nonce:   0,
+					},
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase6,
+			expectedErr: "",
+		},
+		"non-DJTX output Apricot Phase 6": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.ExportedOutputs = []*djtx.TransferableOutput{
+					{
+						Asset: djtx.Asset{ID: nonExistentID},
+						Out: &secp256k1fx.TransferOutput{
+							Amt: exportAmount,
+							OutputOwners: secp256k1fx.OutputOwners{
+								Locktime:  0,
+								Threshold: 1,
+								Addrs:     []ids.ShortID{testShortIDAddrs[0]},
+							},
+						},
+					},
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase6,
+			expectedErr: "",
+		},
+		"non-DJTX input Blueberry": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.Ins = []EVMInput{
+					{
+						Address: testEthAddrs[0],
+						Amount:  1,
+						AssetID: nonExistentID,
+						Nonce:   0,
+					},
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       blueberryRules,
+			expectedErr: errExportNonDJTXInputBlueberry.Error(),
+		},
+		"non-DJTX output Blueberry": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *exportTx
+				tx.ExportedOutputs = []*djtx.TransferableOutput{
+					{
+						Asset: djtx.Asset{ID: nonExistentID},
+						Out: &secp256k1fx.TransferOutput{
+							Amt: exportAmount,
+							OutputOwners: secp256k1fx.OutputOwners{
+								Locktime:  0,
+								Threshold: 1,
+								Addrs:     []ids.ShortID{testShortIDAddrs[0]},
+							},
+						},
+					},
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       blueberryRules,
+			expectedErr: errExportNonDJTXOutputBlueberry.Error(),
 		},
 	}
-	// Test ExportTx with invalid EVM Input amount 0 fails verification
-	if err := exportTx.Verify(ctx, apricotRulesPhase1); err == nil {
-		t.Fatal("ExportTx should have failed verification due to 0 value amount")
-	}
-	exportTx.Ins = []EVMInput{evmInputs[0], evmInputs[0]}
-	// Test non-unique EVM Inputs passes verification before AP1
-	if err := exportTx.Verify(ctx, apricotRulesPhase0); err != nil {
-		t.Fatalf("ExportTx with non-unique EVM Inputs should have passed verification prior to AP1, but failed due to %s", err)
-	}
-	exportTx.Ins = []EVMInput{evmInputs[0], evmInputs[0]}
-	// Test non-unique EVM Inputs fails verification after AP1
-	if err := exportTx.Verify(ctx, apricotRulesPhase1); err == nil {
-		t.Fatal("ExportTx should have failed verification due to non-unique inputs")
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			executeTxVerifyTest(t, test)
+		})
 	}
 }
 
@@ -1631,7 +1784,7 @@ func TestNewExportTx(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			sdb, err := vm.chain.CurrentState()
+			sdb, err := vm.blockChain.State()
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1819,7 +1972,7 @@ func TestNewExportTxMulticoin(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			stdb, err := vm.chain.CurrentState()
+			stdb, err := vm.blockChain.State()
 			if err != nil {
 				t.Fatal(err)
 			}

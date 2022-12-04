@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lasthyphen/beacongo/codec"
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijetsnodego/codec"
+	"github.com/lasthyphen/dijetsnodego/ids"
 )
 
 // Request represents a Network request type
@@ -18,7 +18,7 @@ type Request interface {
 
 	// Handle allows `Request` to call respective methods on handler to handle
 	// this particular request type
-	Handle(ctx context.Context, nodeID ids.ShortID, requestID uint32, handler RequestHandler) ([]byte, error)
+	Handle(ctx context.Context, nodeID ids.NodeID, requestID uint32, handler RequestHandler) ([]byte, error)
 }
 
 // BytesToRequest unmarshals the given requestBytes into Request object

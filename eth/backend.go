@@ -30,10 +30,11 @@ package eth
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
-	"github.com/lasthyphen/beacongo/utils/timer/mockable"
+	"github.com/lasthyphen/dijetsnodego/utils/timer/mockable"
 	"github.com/lasthyphen/coreth/accounts"
 	"github.com/lasthyphen/coreth/consensus"
 	"github.com/lasthyphen/coreth/consensus/dummy"
@@ -63,9 +64,7 @@ import (
 // Deprecated: use ethconfig.Config instead.
 type Config = ethconfig.Config
 
-var (
-	DefaultSettings Settings = Settings{MaxBlocksPerRequest: 2000}
-)
+var DefaultSettings Settings = Settings{MaxBlocksPerRequest: 2000}
 
 type Settings struct {
 	MaxBlocksPerRequest int64 // Maximum number of blocks to serve per getLogs request
@@ -96,7 +95,7 @@ type Ethereum struct {
 	etherbase common.Address
 
 	networkID     uint64
-	netRPCService *ethapi.PublicNetAPI
+	netRPCService *ethapi.NetAPI
 
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
 
@@ -145,13 +144,23 @@ func New(
 	config.TrieCleanCache = roundUpCacheSize(config.TrieCleanCache, 64)
 	config.SnapshotCache = roundUpCacheSize(config.SnapshotCache, 64)
 
-	log.Info("Allocated trie memory caches", "clean", common.StorageSize(config.TrieCleanCache)*1024*1024, "dirty", common.StorageSize(config.TrieDirtyCache)*1024*1024)
+	log.Info(
+		"Allocated trie memory caches",
+		"clean", common.StorageSize(config.TrieCleanCache)*1024*1024,
+		"dirty", common.StorageSize(config.TrieDirtyCache)*1024*1024,
+	)
 
 	chainConfig, genesisErr := core.SetupGenesisBlock(chainDb, config.Genesis)
 	if genesisErr != nil {
 		return nil, genesisErr
 	}
-	log.Info("Initialised chain configuration", "config", chainConfig)
+	log.Info("")
+	log.Info(strings.Repeat("-", 153))
+	for _, line := range strings.Split(chainConfig.String(), "\n") {
+		log.Info(line)
+	}
+	log.Info(strings.Repeat("-", 153))
+	log.Info("")
 
 	// Note: RecoverPruning must be called to handle the case that we are midway through offline pruning.
 	// If the data directory is changed in between runs preventing RecoverPruning from performing its job correctly,
@@ -178,7 +187,7 @@ func New(
 	}
 
 	bcVersion := rawdb.ReadDatabaseVersion(chainDb)
-	var dbVer = "<nil>"
+	dbVer := "<nil>"
 	if bcVersion != nil {
 		dbVer = fmt.Sprintf("%d", *bcVersion)
 	}
@@ -200,13 +209,18 @@ func New(
 		cacheConfig = &core.CacheConfig{
 			TrieCleanLimit:                  config.TrieCleanCache,
 			TrieDirtyLimit:                  config.TrieDirtyCache,
+			TrieDirtyCommitTarget:           config.TrieDirtyCommitTarget,
 			Pruning:                         config.Pruning,
+			AcceptorQueueLimit:              config.AcceptorQueueLimit,
+			CommitInterval:                  config.CommitInterval,
 			PopulateMissingTries:            config.PopulateMissingTries,
 			PopulateMissingTriesParallelism: config.PopulateMissingTriesParallelism,
 			AllowMissingTries:               config.AllowMissingTries,
+			SnapshotDelayInit:               config.SnapshotDelayInit,
 			SnapshotLimit:                   config.SnapshotCache,
 			SnapshotAsync:                   config.SnapshotAsync,
 			SnapshotVerify:                  config.SnapshotVerify,
+			SkipSnapshotRebuild:             config.SkipSnapshotRebuild,
 			Preimages:                       config.Preimages,
 		}
 	)
@@ -248,7 +262,7 @@ func New(
 	}
 
 	// Start the RPC service
-	eth.netRPCService = ethapi.NewPublicNetAPI(eth.NetVersion())
+	eth.netRPCService = ethapi.NewNetAPI(eth.NetVersion())
 
 	eth.stackRPCs = stack.APIs()
 
@@ -269,41 +283,34 @@ func (s *Ethereum) APIs() []rpc.API {
 	// Add the APIs from the node
 	apis = append(apis, s.stackRPCs...)
 
+	// Create [filterSystem] with the log cache size set in the config.
+	ethcfg := s.APIBackend.eth.config
+	filterSystem := filters.NewFilterSystem(s.APIBackend, filters.Config{
+		LogCacheSize: ethcfg.FilterLogCacheSize,
+		Timeout:      5 * time.Minute,
+	})
+
 	// Append all the local APIs and return
 	return append(apis, []rpc.API{
 		{
 			Namespace: "eth",
-			Version:   "1.0",
-			Service:   NewPublicEthereumAPI(s),
-			Public:    true,
-			Name:      "public-eth",
+			Service:   NewEthereumAPI(s),
+			Name:      "eth",
 		}, {
 			Namespace: "eth",
-			Version:   "1.0",
-			Service:   filters.NewPublicFilterAPI(s.APIBackend, false, 5*time.Minute),
-			Public:    true,
-			Name:      "public-eth-filter",
+			Service:   filters.NewFilterAPI(filterSystem, false /* isLightClient */),
+			Name:      "eth-filter",
 		}, {
 			Namespace: "admin",
-			Version:   "1.0",
-			Service:   NewPrivateAdminAPI(s),
-			Name:      "private-admin",
+			Service:   NewAdminAPI(s),
+			Name:      "admin",
 		}, {
 			Namespace: "debug",
-			Version:   "1.0",
-			Service:   NewPublicDebugAPI(s),
-			Public:    true,
-			Name:      "public-debug",
-		}, {
-			Namespace: "debug",
-			Version:   "1.0",
-			Service:   NewPrivateDebugAPI(s),
-			Name:      "private-debug",
+			Service:   NewDebugAPI(s),
+			Name:      "debug",
 		}, {
 			Namespace: "net",
-			Version:   "1.0",
 			Service:   s.netRPCService,
-			Public:    true,
 			Name:      "net",
 		},
 	}...)

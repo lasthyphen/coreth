@@ -10,7 +10,7 @@ import (
 
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijetsnodego/ids"
 	"github.com/lasthyphen/coreth/core/rawdb"
 	"github.com/lasthyphen/coreth/ethdb/memorydb"
 	"github.com/lasthyphen/coreth/plugin/evm/message"

@@ -31,11 +31,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/lasthyphen/coreth/core/rawdb"
 	"github.com/lasthyphen/coreth/ethdb"
-	"github.com/lasthyphen/coreth/ethdb/memorydb"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // Prove constructs a merkle proof for key. The result contains all encoded nodes
@@ -47,9 +46,12 @@ import (
 // with the node that proves the absence of the key.
 func (t *Trie) Prove(key []byte, fromLevel uint, proofDb ethdb.KeyValueWriter) error {
 	// Collect all nodes on the path to key.
+	var (
+		prefix []byte
+		nodes  []node
+		tn     = t.root
+	)
 	key = keybytesToHex(key)
-	var nodes []node
-	tn := t.root
 	for len(key) > 0 && tn != nil {
 		switch n := tn.(type) {
 		case *shortNode:
@@ -58,16 +60,18 @@ func (t *Trie) Prove(key []byte, fromLevel uint, proofDb ethdb.KeyValueWriter) e
 				tn = nil
 			} else {
 				tn = n.Val
+				prefix = append(prefix, n.Key...)
 				key = key[len(n.Key):]
 			}
 			nodes = append(nodes, n)
 		case *fullNode:
 			tn = n.Children[key[0]]
+			prefix = append(prefix, key[0])
 			key = key[1:]
 			nodes = append(nodes, n)
 		case hashNode:
 			var err error
-			tn, err = t.resolveHash(n, nil)
+			tn, err = t.resolveHash(n, prefix)
 			if err != nil {
 				log.Error(fmt.Sprintf("Unhandled trie error: %v", err))
 				return err
@@ -89,7 +93,7 @@ func (t *Trie) Prove(key []byte, fromLevel uint, proofDb ethdb.KeyValueWriter) e
 		if hash, ok := hn.(hashNode); ok || i == 0 {
 			// If the node's database encoding is a hash (or is the
 			// root node), it becomes a proof element.
-			enc, _ := rlp.EncodeToBytes(n)
+			enc := nodeToBytes(n)
 			if !ok {
 				hash = hasher.hashData(enc)
 			}
@@ -106,7 +110,7 @@ func (t *Trie) Prove(key []byte, fromLevel uint, proofDb ethdb.KeyValueWriter) e
 // If the trie does not contain a value for key, the returned proof contains all
 // nodes of the longest existing prefix of the key (at least the root node), ending
 // with the node that proves the absence of the key.
-func (t *SecureTrie) Prove(key []byte, fromLevel uint, proofDb ethdb.KeyValueWriter) error {
+func (t *StateTrie) Prove(key []byte, fromLevel uint, proofDb ethdb.KeyValueWriter) error {
 	return t.trie.Prove(key, fromLevel, proofDb)
 }
 
@@ -345,9 +349,9 @@ findFork:
 // unset removes all internal node references either the left most or right most.
 // It can meet these scenarios:
 //
-// - The given path is existent in the trie, unset the associated nodes with the
-//   specific direction
-// - The given path is non-existent in the trie
+//   - The given path is existent in the trie, unset the associated nodes with the
+//     specific direction
+//   - The given path is non-existent in the trie
 //   - the fork point is a fullnode, the corresponding child pointed by path
 //     is nil, return
 //   - the fork point is a shortnode, the shortnode is included in the range,
@@ -379,11 +383,12 @@ func unset(parent node, child node, key []byte, pos int, removeLeft bool) error 
 					// branch. The parent must be a fullnode.
 					fn := parent.(*fullNode)
 					fn.Children[key[pos-1]] = nil
-				} else {
-					// The key of fork shortnode is greater than the
-					// path(it doesn't belong to the range), keep
-					// it with the cached hash available.
 				}
+				//else {
+				// The key of fork shortnode is greater than the
+				// path(it doesn't belong to the range), keep
+				// it with the cached hash available.
+				//}
 			} else {
 				if bytes.Compare(cld.Key, key[pos:]) > 0 {
 					// The key of fork shortnode is greater than the
@@ -391,11 +396,12 @@ func unset(parent node, child node, key []byte, pos int, removeLeft bool) error 
 					// branch. The parent must be a fullnode.
 					fn := parent.(*fullNode)
 					fn.Children[key[pos-1]] = nil
-				} else {
-					// The key of fork shortnode is less than the
-					// path(it doesn't belong to the range), keep
-					// it with the cached hash available.
 				}
+				//else {
+				// The key of fork shortnode is less than the
+				// path(it doesn't belong to the range), keep
+				// it with the cached hash available.
+				//}
 			}
 			return nil
 		}
@@ -462,15 +468,15 @@ func hasRightElement(node node, key []byte) bool {
 // Expect the normal case, this function can also be used to verify the following
 // range proofs:
 //
-// - All elements proof. In this case the proof can be nil, but the range should
-//   be all the leaves in the trie.
+//   - All elements proof. In this case the proof can be nil, but the range should
+//     be all the leaves in the trie.
 //
-// - One element proof. In this case no matter the edge proof is a non-existent
-//   proof or not, we can always verify the correctness of the proof.
+//   - One element proof. In this case no matter the edge proof is a non-existent
+//     proof or not, we can always verify the correctness of the proof.
 //
-// - Zero element proof. In this case a single non-existent proof is enough to prove.
-//   Besides, if there are still some other leaves available on the right side, then
-//   an error will be returned.
+//   - Zero element proof. In this case a single non-existent proof is enough to prove.
+//     Besides, if there are still some other leaves available on the right side, then
+//     an error will be returned.
 //
 // Except returning the error to indicate the proof is valid or not, the function will
 // also return a flag to indicate whether there exists more accounts/slots in the trie.
@@ -539,7 +545,7 @@ func VerifyRangeProof(rootHash common.Hash, firstKey []byte, lastKey []byte, key
 	}
 	// todo(rjl493456442) different length edge keys should be supported
 	if len(firstKey) != len(lastKey) {
-		return false, errors.New("inconsistent edge keys")
+		return false, fmt.Errorf("inconsistent edge keys (%d != %d)", len(firstKey), len(lastKey))
 	}
 	// Convert the edge proofs to edge trie paths. Then we can
 	// have the same tree architecture with the original one.
@@ -563,7 +569,7 @@ func VerifyRangeProof(rootHash common.Hash, firstKey []byte, lastKey []byte, key
 	}
 	// Rebuild the trie with the leaf stream, the shape of trie
 	// should be same with the original one.
-	tr := &Trie{root: root, db: NewDatabase(memorydb.New())}
+	tr := &Trie{root: root, db: NewDatabase(rawdb.NewMemoryDatabase())}
 	if empty {
 		tr.root = nil
 	}

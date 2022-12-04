@@ -35,10 +35,10 @@ import (
 	"github.com/lasthyphen/coreth/accounts"
 	"github.com/lasthyphen/coreth/consensus"
 	"github.com/lasthyphen/coreth/core"
-	"github.com/lasthyphen/coreth/core/bloombits"
 	"github.com/lasthyphen/coreth/core/state"
 	"github.com/lasthyphen/coreth/core/types"
 	"github.com/lasthyphen/coreth/core/vm"
+	"github.com/lasthyphen/coreth/eth/filters"
 	"github.com/lasthyphen/coreth/ethdb"
 	"github.com/lasthyphen/coreth/params"
 	"github.com/lasthyphen/coreth/rpc"
@@ -78,6 +78,7 @@ type Backend interface {
 	SubscribeChainEvent(ch chan<- core.ChainEvent) event.Subscription
 	SubscribeChainHeadEvent(ch chan<- core.ChainHeadEvent) event.Subscription
 	SubscribeChainSideEvent(ch chan<- core.ChainSideEvent) event.Subscription
+	BadBlocks() ([]*types.Block, []*core.BadBlockReason)
 
 	// Transaction pool API
 	SendTx(ctx context.Context, signedTx *types.Transaction) error
@@ -90,18 +91,13 @@ type Backend interface {
 	TxPoolContentFrom(addr common.Address) (types.Transactions, types.Transactions)
 	SubscribeNewTxsEvent(chan<- core.NewTxsEvent) event.Subscription
 
-	// Filter API
-	BloomStatus() (uint64, uint64)
-	GetLogs(ctx context.Context, blockHash common.Hash) ([][]*types.Log, error)
-	ServiceFilter(ctx context.Context, session *bloombits.MatcherSession)
-	SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription
-	SubscribeAcceptedLogsEvent(ch chan<- []*types.Log) event.Subscription
-	SubscribePendingLogsEvent(ch chan<- []*types.Log) event.Subscription
-	SubscribeRemovedLogsEvent(ch chan<- core.RemovedLogsEvent) event.Subscription
-
 	ChainConfig() *params.ChainConfig
 	Engine() consensus.Engine
 	LastAcceptedBlock() *types.Block
+
+	// eth/filters needs to be initialized from this backend type, so methods needed by
+	// it must also be included here.
+	filters.Backend
 }
 
 func GetAPIs(apiBackend Backend) []rpc.API {
@@ -109,51 +105,32 @@ func GetAPIs(apiBackend Backend) []rpc.API {
 	return []rpc.API{
 		{
 			Namespace: "eth",
-			Version:   "1.0",
-			Service:   NewPublicEthereumAPI(apiBackend),
-			Public:    true,
-			Name:      "internal-public-eth",
+			Service:   NewEthereumAPI(apiBackend),
+			Name:      "internal-eth",
 		}, {
 			Namespace: "eth",
-			Version:   "1.0",
-			Service:   NewPublicBlockChainAPI(apiBackend),
-			Public:    true,
-			Name:      "internal-public-blockchain",
+			Service:   NewBlockChainAPI(apiBackend),
+			Name:      "internal-blockchain",
 		}, {
 			Namespace: "eth",
-			Version:   "1.0",
-			Service:   NewPublicTransactionPoolAPI(apiBackend, nonceLock),
-			Public:    true,
-			Name:      "internal-public-transaction-pool",
+			Service:   NewTransactionAPI(apiBackend, nonceLock),
+			Name:      "internal-transaction",
 		}, {
 			Namespace: "txpool",
-			Version:   "1.0",
-			Service:   NewPublicTxPoolAPI(apiBackend),
-			Public:    true,
-			Name:      "internal-public-tx-pool",
+			Service:   NewTxPoolAPI(apiBackend),
+			Name:      "internal-tx-pool",
 		}, {
 			Namespace: "debug",
-			Version:   "1.0",
-			Service:   NewPublicDebugAPI(apiBackend),
-			Public:    true,
-			Name:      "internal-public-debug",
-		}, {
-			Namespace: "debug",
-			Version:   "1.0",
-			Service:   NewPrivateDebugAPI(apiBackend),
-			Name:      "internal-private-debug",
+			Service:   NewDebugAPI(apiBackend),
+			Name:      "internal-debug",
 		}, {
 			Namespace: "eth",
-			Version:   "1.0",
-			Service:   NewPublicAccountAPI(apiBackend.AccountManager()),
-			Public:    true,
-			Name:      "internal-public-account",
+			Service:   NewEthereumAccountAPI(apiBackend.AccountManager()),
+			Name:      "internal-account",
 		}, {
 			Namespace: "personal",
-			Version:   "1.0",
-			Service:   NewPrivateAccountAPI(apiBackend, nonceLock),
-			Public:    false,
-			Name:      "internal-private-personal",
+			Service:   NewPersonalAccountAPI(apiBackend, nonceLock),
+			Name:      "internal-personal",
 		},
 	}
 }

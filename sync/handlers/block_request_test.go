@@ -7,7 +7,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijetsnodego/ids"
 	"github.com/lasthyphen/coreth/consensus/dummy"
 	"github.com/lasthyphen/coreth/core"
 	"github.com/lasthyphen/coreth/core/types"

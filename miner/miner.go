@@ -28,7 +28,7 @@
 package miner
 
 import (
-	"github.com/lasthyphen/beacongo/utils/timer/mockable"
+	"github.com/lasthyphen/dijetsnodego/utils/timer/mockable"
 	"github.com/lasthyphen/coreth/consensus"
 	"github.com/lasthyphen/coreth/core"
 	"github.com/lasthyphen/coreth/core/types"

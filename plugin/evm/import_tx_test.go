@@ -10,12 +10,12 @@ import (
 	"github.com/lasthyphen/coreth/params"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/lasthyphen/beacongo/chains/atomic"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/utils/constants"
-	"github.com/lasthyphen/beacongo/utils/crypto"
-	"github.com/lasthyphen/beacongo/vms/components/djtx"
-	"github.com/lasthyphen/beacongo/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodego/chains/atomic"
+	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodego/utils/constants"
+	"github.com/lasthyphen/dijetsnodego/utils/crypto"
+	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
+	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
 )
 
 // createImportTxOptions adds a UTXO to shared memory and generates a list of import transactions sending this UTXO
@@ -132,7 +132,15 @@ func TestImportTxVerify(t *testing.T) {
 			},
 			ctx:         ctx,
 			rules:       apricotRulesPhase0,
-			expectedErr: "", // Expect this transaction to be valid
+			expectedErr: "", // Expect this transaction to be valid in Apricot Phase 0
+		},
+		"valid import tx blueberry": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				return importTx
+			},
+			ctx:         ctx,
+			rules:       blueberryRules,
+			expectedErr: "", // Expect this transaction to be valid in Blueberry
 		},
 		"invalid network ID": {
 			generate: func(t *testing.T) UnsignedAtomicTx {
@@ -323,6 +331,86 @@ func TestImportTxVerify(t *testing.T) {
 			rules:       apricotRulesPhase3,
 			expectedErr: errNoEVMOutputs.Error(),
 		},
+		"non-DJTX input Apricot Phase 6": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *importTx
+				tx.ImportedInputs = []*djtx.TransferableInput{
+					{
+						UTXOID: djtx.UTXOID{
+							TxID:        txID,
+							OutputIndex: uint32(0),
+						},
+						Asset: djtx.Asset{ID: ids.GenerateTestID()},
+						In: &secp256k1fx.TransferInput{
+							Amt: importAmount,
+							Input: secp256k1fx.Input{
+								SigIndices: []uint32{0},
+							},
+						},
+					},
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase6,
+			expectedErr: "",
+		},
+		"non-DJTX output Apricot Phase 6": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *importTx
+				tx.Outs = []EVMOutput{
+					{
+						Address: importTx.Outs[0].Address,
+						Amount:  importTx.Outs[0].Amount,
+						AssetID: ids.GenerateTestID(),
+					},
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       apricotRulesPhase6,
+			expectedErr: "",
+		},
+		"non-DJTX input Blueberry": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *importTx
+				tx.ImportedInputs = []*djtx.TransferableInput{
+					{
+						UTXOID: djtx.UTXOID{
+							TxID:        txID,
+							OutputIndex: uint32(0),
+						},
+						Asset: djtx.Asset{ID: ids.GenerateTestID()},
+						In: &secp256k1fx.TransferInput{
+							Amt: importAmount,
+							Input: secp256k1fx.Input{
+								SigIndices: []uint32{0},
+							},
+						},
+					},
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       blueberryRules,
+			expectedErr: errImportNonDJTXInputBlueberry.Error(),
+		},
+		"non-DJTX output Blueberry": {
+			generate: func(t *testing.T) UnsignedAtomicTx {
+				tx := *importTx
+				tx.Outs = []EVMOutput{
+					{
+						Address: importTx.Outs[0].Address,
+						Amount:  importTx.Outs[0].Amount,
+						AssetID: ids.GenerateTestID(),
+					},
+				}
+				return &tx
+			},
+			ctx:         ctx,
+			rules:       blueberryRules,
+			expectedErr: errImportNonDJTXOutputBlueberry.Error(),
+		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -399,7 +487,7 @@ func TestNewImportTx(t *testing.T) {
 		}
 
 		// Ensure that the call to EVMStateTransfer correctly updates the balance of [addr]
-		sdb, err := vm.chain.CurrentState()
+		sdb, err := vm.blockChain.State()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -409,7 +497,6 @@ func TestNewImportTx(t *testing.T) {
 		if actualBalance := sdb.GetBalance(addr); actualBalance.Cmp(expectedRemainingBalance) != 0 {
 			t.Fatalf("address remaining balance %s equal %s not %s", addr.String(), actualBalance, expectedRemainingBalance)
 		}
-
 	}
 	tests2 := map[string]atomicTxTest{
 		"apricot phase 0": {
@@ -1130,7 +1217,7 @@ func TestImportTxEVMStateTransfer(t *testing.T) {
 			checkState: func(t *testing.T, vm *VM) {
 				lastAcceptedBlock := vm.LastAcceptedBlockInternal().(*Block)
 
-				sdb, err := vm.chain.BlockState(lastAcceptedBlock.ethBlock)
+				sdb, err := vm.blockChain.StateAt(lastAcceptedBlock.ethBlock.Root())
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -1175,7 +1262,7 @@ func TestImportTxEVMStateTransfer(t *testing.T) {
 			checkState: func(t *testing.T, vm *VM) {
 				lastAcceptedBlock := vm.LastAcceptedBlockInternal().(*Block)
 
-				sdb, err := vm.chain.BlockState(lastAcceptedBlock.ethBlock)
+				sdb, err := vm.blockChain.StateAt(lastAcceptedBlock.ethBlock.Root())
 				if err != nil {
 					t.Fatal(err)
 				}

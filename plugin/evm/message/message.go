@@ -7,12 +7,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/lasthyphen/beacongo/codec"
+	"github.com/lasthyphen/dijetsnodego/codec"
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/utils/units"
+	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodego/utils/units"
 )
 
 const (
@@ -35,14 +35,14 @@ type GossipMessage interface {
 	fmt.Stringer
 
 	// Handle this gossip message with the gossip handler.
-	Handle(handler GossipHandler, nodeID ids.ShortID) error
+	Handle(handler GossipHandler, nodeID ids.NodeID) error
 }
 
 type AtomicTxGossip struct {
 	Tx []byte `serialize:"true"`
 }
 
-func (msg AtomicTxGossip) Handle(handler GossipHandler, nodeID ids.ShortID) error {
+func (msg AtomicTxGossip) Handle(handler GossipHandler, nodeID ids.NodeID) error {
 	return handler.HandleAtomicTx(nodeID, msg)
 }
 
@@ -54,7 +54,7 @@ type EthTxsGossip struct {
 	Txs []byte `serialize:"true"`
 }
 
-func (msg EthTxsGossip) Handle(handler GossipHandler, nodeID ids.ShortID) error {
+func (msg EthTxsGossip) Handle(handler GossipHandler, nodeID ids.NodeID) error {
 	return handler.HandleEthTxs(nodeID, msg)
 }
 

@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/lasthyphen/beacongo/ids"
+	"github.com/lasthyphen/dijetsnodego/ids"
 	"github.com/lasthyphen/coreth/core/rawdb"
 	"github.com/lasthyphen/coreth/core/state/snapshot"
 	"github.com/lasthyphen/coreth/core/types"
@@ -42,18 +42,30 @@ func TestLeafsRequestHandler_OnLeafsRequest(t *testing.T) {
 		common.Hash{},
 		10_000,
 		func(t *testing.T, i int, acc types.StateAccount) types.StateAccount {
+			// set the storage trie root for two accounts
 			if i == 0 {
-				// set the storage trie root for a single account
 				acc.Root = largeTrieRoot
+			} else if i == 1 {
+				acc.Root = smallTrieRoot
 			}
+
 			return acc
 		})
 
 	// find the hash of the account we set to have a storage
-	var accHash common.Hash
+	var (
+		largeStorageAccount common.Hash
+		smallStorageAccount common.Hash
+	)
 	for key, account := range accounts {
 		if account.Root == largeTrieRoot {
-			accHash = crypto.Keccak256Hash(key.Address[:])
+			largeStorageAccount = crypto.Keccak256Hash(key.Address[:])
+		}
+		if account.Root == smallTrieRoot {
+			smallStorageAccount = crypto.Keccak256Hash(key.Address[:])
+		}
+		if (largeStorageAccount != common.Hash{}) && (smallStorageAccount != common.Hash{}) {
+			// we can break if we found both accounts of interest to the test
 			break
 		}
 	}
@@ -210,7 +222,6 @@ func TestLeafsRequestHandler_OnLeafsRequest(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Len(t, leafsResponse.Keys, 500)
 				assert.Len(t, leafsResponse.Vals, 500)
-				assert.Len(t, leafsResponse.ProofKeys, 0)
 				assert.Len(t, leafsResponse.ProofVals, 0)
 			},
 		},
@@ -422,7 +433,6 @@ func TestLeafsRequestHandler_OnLeafsRequest(t *testing.T) {
 
 				assert.EqualValues(t, 500, len(leafsResponse.Keys))
 				assert.EqualValues(t, 500, len(leafsResponse.Vals))
-				assert.Empty(t, leafsResponse.ProofKeys)
 				assert.Empty(t, leafsResponse.ProofVals)
 				assert.EqualValues(t, 1, mockHandlerStats.LeafsRequestCount)
 				assert.EqualValues(t, len(leafsResponse.Keys), mockHandlerStats.LeafsReturnedSum)
@@ -521,7 +531,7 @@ func TestLeafsRequestHandler_OnLeafsRequest(t *testing.T) {
 				snapshotProvider.Snapshot = snap
 				return context.Background(), message.LeafsRequest{
 					Root:     largeTrieRoot,
-					Account:  accHash,
+					Account:  largeStorageAccount,
 					Limit:    maxLeavesLimit,
 					NodeType: message.StateTrieNode,
 				}
@@ -547,7 +557,7 @@ func TestLeafsRequestHandler_OnLeafsRequest(t *testing.T) {
 					t.Fatal(err)
 				}
 				snapshotProvider.Snapshot = snap
-				it := snap.DiskStorageIterator(accHash, common.Hash{})
+				it := snap.DiskStorageIterator(largeStorageAccount, common.Hash{})
 				defer it.Release()
 				i := 0
 				for it.Next() {
@@ -560,14 +570,14 @@ func TestLeafsRequestHandler_OnLeafsRequest(t *testing.T) {
 						randomBytes := make([]byte, 5)
 						_, err := rand.Read(randomBytes)
 						assert.NoError(t, err)
-						rawdb.WriteStorageSnapshot(memdb, accHash, it.Hash(), randomBytes)
+						rawdb.WriteStorageSnapshot(memdb, largeStorageAccount, it.Hash(), randomBytes)
 					}
 					i++
 				}
 
 				return context.Background(), message.LeafsRequest{
 					Root:     largeTrieRoot,
-					Account:  accHash,
+					Account:  largeStorageAccount,
 					Limit:    maxLeavesLimit,
 					NodeType: message.StateTrieNode,
 				}
@@ -589,6 +599,79 @@ func TestLeafsRequestHandler_OnLeafsRequest(t *testing.T) {
 				numSegments := maxLeavesLimit / segmentLen
 				assert.EqualValues(t, numSegments/4, mockHandlerStats.SnapshotSegmentInvalidCount)
 				assert.EqualValues(t, 3*numSegments/4, mockHandlerStats.SnapshotSegmentValidCount)
+			},
+		},
+		"last snapshot key removed": {
+			prepareTestFn: func() (context.Context, message.LeafsRequest) {
+				snap, err := snapshot.New(memdb, trieDB, 64, common.Hash{}, accountTrieRoot, false, true, false)
+				if err != nil {
+					t.Fatal(err)
+				}
+				snapshotProvider.Snapshot = snap
+				it := snap.DiskStorageIterator(smallStorageAccount, common.Hash{})
+				defer it.Release()
+				var lastKey common.Hash
+				for it.Next() {
+					lastKey = it.Hash()
+				}
+				rawdb.DeleteStorageSnapshot(memdb, smallStorageAccount, lastKey)
+
+				return context.Background(), message.LeafsRequest{
+					Root:     smallTrieRoot,
+					Account:  smallStorageAccount,
+					Limit:    maxLeavesLimit,
+					NodeType: message.StateTrieNode,
+				}
+			},
+			assertResponseFn: func(t *testing.T, request message.LeafsRequest, response []byte, err error) {
+				assert.NoError(t, err)
+				var leafsResponse message.LeafsResponse
+				_, err = message.Codec.Unmarshal(response, &leafsResponse)
+				assert.NoError(t, err)
+				assert.EqualValues(t, 500, len(leafsResponse.Keys))
+				assert.EqualValues(t, 500, len(leafsResponse.Vals))
+				assert.EqualValues(t, 1, mockHandlerStats.LeafsRequestCount)
+				assert.EqualValues(t, len(leafsResponse.Keys), mockHandlerStats.LeafsReturnedSum)
+				assert.EqualValues(t, 1, mockHandlerStats.SnapshotReadAttemptCount)
+				assert.EqualValues(t, 1, mockHandlerStats.SnapshotReadSuccessCount)
+				assertRangeProofIsValid(t, &request, &leafsResponse, false)
+			},
+		},
+		"request last key when removed from snapshot": {
+			prepareTestFn: func() (context.Context, message.LeafsRequest) {
+				snap, err := snapshot.New(memdb, trieDB, 64, common.Hash{}, accountTrieRoot, false, true, false)
+				if err != nil {
+					t.Fatal(err)
+				}
+				snapshotProvider.Snapshot = snap
+				it := snap.DiskStorageIterator(smallStorageAccount, common.Hash{})
+				defer it.Release()
+				var lastKey common.Hash
+				for it.Next() {
+					lastKey = it.Hash()
+				}
+				rawdb.DeleteStorageSnapshot(memdb, smallStorageAccount, lastKey)
+
+				return context.Background(), message.LeafsRequest{
+					Root:     smallTrieRoot,
+					Account:  smallStorageAccount,
+					Start:    lastKey[:],
+					Limit:    maxLeavesLimit,
+					NodeType: message.StateTrieNode,
+				}
+			},
+			assertResponseFn: func(t *testing.T, request message.LeafsRequest, response []byte, err error) {
+				assert.NoError(t, err)
+				var leafsResponse message.LeafsResponse
+				_, err = message.Codec.Unmarshal(response, &leafsResponse)
+				assert.NoError(t, err)
+				assert.EqualValues(t, 1, len(leafsResponse.Keys))
+				assert.EqualValues(t, 1, len(leafsResponse.Vals))
+				assert.EqualValues(t, 1, mockHandlerStats.LeafsRequestCount)
+				assert.EqualValues(t, len(leafsResponse.Keys), mockHandlerStats.LeafsReturnedSum)
+				assert.EqualValues(t, 1, mockHandlerStats.SnapshotReadAttemptCount)
+				assert.EqualValues(t, 0, mockHandlerStats.SnapshotReadSuccessCount)
+				assertRangeProofIsValid(t, &request, &leafsResponse, false)
 			},
 		},
 	}
@@ -621,11 +704,12 @@ func assertRangeProofIsValid(t *testing.T, request *message.LeafsRequest, respon
 	}
 
 	var proof ethdb.Database
-	if len(response.ProofKeys) > 0 {
+	if len(response.ProofVals) > 0 {
 		proof = memorydb.New()
 		defer proof.Close()
-		for i, proofKey := range response.ProofKeys {
-			if err := proof.Put(proofKey, response.ProofVals[i]); err != nil {
+		for _, proofVal := range response.ProofVals {
+			proofKey := crypto.Keccak256(proofVal)
+			if err := proof.Put(proofKey, proofVal); err != nil {
 				t.Fatal(err)
 			}
 		}

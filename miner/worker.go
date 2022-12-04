@@ -36,7 +36,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lasthyphen/beacongo/utils/timer/mockable"
 	"github.com/lasthyphen/coreth/consensus"
 	"github.com/lasthyphen/coreth/consensus/dummy"
 	"github.com/lasthyphen/coreth/consensus/misc"
@@ -44,9 +43,16 @@ import (
 	"github.com/lasthyphen/coreth/core/state"
 	"github.com/lasthyphen/coreth/core/types"
 	"github.com/lasthyphen/coreth/params"
+	"github.com/lasthyphen/coreth/vmerrs"
+	"github.com/lasthyphen/dijetsnodego/utils/timer/mockable"
+	"github.com/lasthyphen/dijetsnodego/utils/units"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
+)
+
+const (
+	targetTxsSize = 192 * units.KiB
 )
 
 // environment is the worker's current environment and holds all of the current state information.
@@ -61,6 +67,7 @@ type environment struct {
 	header   *types.Header
 	txs      []*types.Transaction
 	receipts []*types.Receipt
+	size     common.StorageSize
 
 	start time.Time // Time that block building began
 }
@@ -161,6 +168,8 @@ func (w *worker) commitNewWork() (*types.Block, error) {
 	if w.chainConfig.DAOForkSupport && w.chainConfig.DAOForkBlock != nil && w.chainConfig.DAOForkBlock.Cmp(header.Number) == 0 {
 		misc.ApplyDAOHardFork(env.state)
 	}
+	// Configure any stateful precompiles that should go into effect during this block.
+	w.chainConfig.CheckConfigurePrecompiles(new(big.Int).SetUint64(parent.Time()), types.NewBlockWithHeader(header), env.state)
 
 	// Fill the block with all available pending transactions.
 	pending := w.eth.TxPool().Pending(true)
@@ -212,6 +221,7 @@ func (w *worker) commitTransaction(env *environment, tx *types.Transaction, coin
 	}
 	env.txs = append(env.txs, tx)
 	env.receipts = append(env.receipts, receipt)
+	env.size += tx.Size()
 
 	return receipt.Logs, nil
 }
@@ -227,6 +237,14 @@ func (w *worker) commitTransactions(env *environment, txs *types.TransactionsByP
 		tx := txs.Peek()
 		if tx == nil {
 			break
+		}
+		// Abort transaction if it won't fit in the block and continue to search for a smaller
+		// transction that will fit.
+		if totalTxsSize := env.size + tx.Size(); totalTxsSize > targetTxsSize {
+			log.Trace("Skipping transaction that would exceed target size", "hash", tx.Hash(), "totalTxsSize", totalTxsSize, "txSize", tx.Size())
+
+			txs.Pop()
+			continue
 		}
 		// Error may be ignored here. The error has already been checked
 		// during transaction acceptance is the transaction pool.
@@ -270,6 +288,10 @@ func (w *worker) commitTransactions(env *environment, txs *types.TransactionsByP
 			log.Trace("Skipping unsupported transaction type", "sender", from, "type", tx.Type())
 			txs.Pop()
 
+		case errors.Is(err, vmerrs.ErrToAddrProhibitedSoft):
+			log.Warn("Tx dropped: failed verification", "tx", tx.Hash(), "sender", from, "data", tx.Data(), "err", err)
+			w.eth.TxPool().RemoveTx(tx.Hash())
+			txs.Pop()
 		default:
 			// Strange error, discard the transaction and get the next in line (note, the
 			// nonce-too-high clause will prevent us from executing in vain).

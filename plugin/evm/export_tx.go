@@ -4,24 +4,32 @@
 package evm
 
 import (
+	"errors"
 	"fmt"
 	"math/big"
 
 	"github.com/lasthyphen/coreth/core/state"
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/beacongo/chains/atomic"
-	"github.com/lasthyphen/beacongo/ids"
-	"github.com/lasthyphen/beacongo/snow"
-	"github.com/lasthyphen/beacongo/utils/constants"
-	"github.com/lasthyphen/beacongo/utils/crypto"
-	"github.com/lasthyphen/beacongo/utils/math"
-	"github.com/lasthyphen/beacongo/utils/wrappers"
-	"github.com/lasthyphen/beacongo/vms/components/djtx"
-	"github.com/lasthyphen/beacongo/vms/components/verify"
-	"github.com/lasthyphen/beacongo/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodego/chains/atomic"
+	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodego/snow"
+	"github.com/lasthyphen/dijetsnodego/utils/constants"
+	"github.com/lasthyphen/dijetsnodego/utils/crypto"
+	"github.com/lasthyphen/dijetsnodego/utils/math"
+	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
+	"github.com/lasthyphen/dijetsnodego/vms/components/verify"
+	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
+)
+
+var (
+	_                               UnsignedAtomicTx       = &UnsignedExportTx{}
+	_                               secp256k1fx.UnsignedTx = &UnsignedExportTx{}
+	errExportNonDJTXInputBlueberry                         = errors.New("export input cannot contain non-DJTX in Blueberry")
+	errExportNonDJTXOutputBlueberry                        = errors.New("export output cannot contain non-DJTX in Blueberry")
 )
 
 // UnsignedExportTx is an unsigned ExportTx
@@ -40,11 +48,11 @@ type UnsignedExportTx struct {
 }
 
 // InputUTXOs returns a set of all the hash(address:nonce) exporting funds.
-func (tx *UnsignedExportTx) InputUTXOs() ids.Set {
-	set := ids.NewSet(len(tx.Ins))
-	for _, in := range tx.Ins {
-		// Total populated bytes is 20 (Address) + 8 (Nonce), however, we allocate
-		// 32 bytes to make ids.ID casting easier.
+func (utx *UnsignedExportTx) InputUTXOs() ids.Set {
+	set := ids.NewSet(len(utx.Ins))
+	for _, in := range utx.Ins {
+		// Total populated bytes is exactly 32 bytes.
+		// 8 (Nonce) + 4 (Address Length) + 20 (Address)
 		var rawID [32]byte
 		packer := wrappers.Packer{Bytes: rawID[:]}
 		packer.PackLong(in.Nonce)
@@ -55,18 +63,18 @@ func (tx *UnsignedExportTx) InputUTXOs() ids.Set {
 }
 
 // Verify this transaction is well-formed
-func (tx *UnsignedExportTx) Verify(
+func (utx *UnsignedExportTx) Verify(
 	ctx *snow.Context,
 	rules params.Rules,
 ) error {
 	switch {
-	case tx == nil:
+	case utx == nil:
 		return errNilTx
-	case len(tx.ExportedOutputs) == 0:
+	case len(utx.ExportedOutputs) == 0:
 		return errNoExportOutputs
-	case tx.NetworkID != ctx.NetworkID:
+	case utx.NetworkID != ctx.NetworkID:
 		return errWrongNetworkID
-	case ctx.ChainID != tx.BlockchainID:
+	case ctx.ChainID != utx.BlockchainID:
 		return errWrongBlockchainID
 	}
 
@@ -74,43 +82,49 @@ func (tx *UnsignedExportTx) Verify(
 	if rules.IsApricotPhase5 {
 		// Note that SameSubnet verifies that [tx.DestinationChain] isn't this
 		// chain's ID
-		if err := verify.SameSubnet(ctx, tx.DestinationChain); err != nil {
+		if err := verify.SameSubnet(ctx, utx.DestinationChain); err != nil {
 			return errWrongChainID
 		}
 	} else {
-		if tx.DestinationChain != ctx.XChainID {
+		if utx.DestinationChain != ctx.XChainID {
 			return errWrongChainID
 		}
 	}
 
-	for _, in := range tx.Ins {
+	for _, in := range utx.Ins {
 		if err := in.Verify(); err != nil {
 			return err
 		}
+		if rules.IsBlueberry && in.AssetID != ctx.DJTXAssetID {
+			return errExportNonDJTXInputBlueberry
+		}
 	}
 
-	for _, out := range tx.ExportedOutputs {
+	for _, out := range utx.ExportedOutputs {
 		if err := out.Verify(); err != nil {
 			return err
 		}
 		assetID := out.AssetID()
-		if assetID != ctx.DJTXAssetID && tx.DestinationChain == constants.PlatformChainID {
+		if assetID != ctx.DJTXAssetID && utx.DestinationChain == constants.PlatformChainID {
 			return errWrongChainID
 		}
+		if rules.IsBlueberry && assetID != ctx.DJTXAssetID {
+			return errExportNonDJTXOutputBlueberry
+		}
 	}
-	if !djtx.IsSortedTransferableOutputs(tx.ExportedOutputs, Codec) {
+	if !djtx.IsSortedTransferableOutputs(utx.ExportedOutputs, Codec) {
 		return errOutputsNotSorted
 	}
-	if rules.IsApricotPhase1 && !IsSortedAndUniqueEVMInputs(tx.Ins) {
+	if rules.IsApricotPhase1 && !IsSortedAndUniqueEVMInputs(utx.Ins) {
 		return errInputsNotSortedUnique
 	}
 
 	return nil
 }
 
-func (tx *UnsignedExportTx) GasUsed(fixedFee bool) (uint64, error) {
-	byteCost := calcBytesCost(len(tx.UnsignedBytes()))
-	numSigs := uint64(len(tx.Ins))
+func (utx *UnsignedExportTx) GasUsed(fixedFee bool) (uint64, error) {
+	byteCost := calcBytesCost(len(utx.Bytes()))
+	numSigs := uint64(len(utx.Ins))
 	sigCost, err := math.Mul64(numSigs, secp256k1fx.CostPerSignature)
 	if err != nil {
 		return 0, err
@@ -130,13 +144,13 @@ func (tx *UnsignedExportTx) GasUsed(fixedFee bool) (uint64, error) {
 }
 
 // Amount of [assetID] burned by this transaction
-func (tx *UnsignedExportTx) Burned(assetID ids.ID) (uint64, error) {
+func (utx *UnsignedExportTx) Burned(assetID ids.ID) (uint64, error) {
 	var (
 		spent uint64
 		input uint64
 		err   error
 	)
-	for _, out := range tx.ExportedOutputs {
+	for _, out := range utx.ExportedOutputs {
 		if out.AssetID() == assetID {
 			spent, err = math.Add64(spent, out.Output().Amount())
 			if err != nil {
@@ -144,7 +158,7 @@ func (tx *UnsignedExportTx) Burned(assetID ids.ID) (uint64, error) {
 			}
 		}
 	}
-	for _, in := range tx.Ins {
+	for _, in := range utx.Ins {
 		if in.AssetID == assetID {
 			input, err = math.Add64(input, in.Amount)
 			if err != nil {
@@ -157,14 +171,14 @@ func (tx *UnsignedExportTx) Burned(assetID ids.ID) (uint64, error) {
 }
 
 // SemanticVerify this transaction is valid.
-func (tx *UnsignedExportTx) SemanticVerify(
+func (utx *UnsignedExportTx) SemanticVerify(
 	vm *VM,
 	stx *Tx,
 	_ *Block,
 	baseFee *big.Int,
 	rules params.Rules,
 ) error {
-	if err := tx.Verify(vm.ctx, rules); err != nil {
+	if err := utx.Verify(vm.ctx, rules); err != nil {
 		return err
 	}
 
@@ -186,10 +200,10 @@ func (tx *UnsignedExportTx) SemanticVerify(
 	default:
 		fc.Produce(vm.ctx.DJTXAssetID, params.AvalancheAtomicTxFee)
 	}
-	for _, out := range tx.ExportedOutputs {
+	for _, out := range utx.ExportedOutputs {
 		fc.Produce(out.AssetID(), out.Output().Amount())
 	}
-	for _, in := range tx.Ins {
+	for _, in := range utx.Ins {
 		fc.Consume(in.AssetID, in.Amount)
 	}
 
@@ -197,11 +211,11 @@ func (tx *UnsignedExportTx) SemanticVerify(
 		return fmt.Errorf("export tx flow check failed due to: %w", err)
 	}
 
-	if len(tx.Ins) != len(stx.Creds) {
-		return fmt.Errorf("export tx contained mismatched number of inputs/credentials (%d vs. %d)", len(tx.Ins), len(stx.Creds))
+	if len(utx.Ins) != len(stx.Creds) {
+		return fmt.Errorf("export tx contained mismatched number of inputs/credentials (%d vs. %d)", len(utx.Ins), len(stx.Creds))
 	}
 
-	for i, input := range tx.Ins {
+	for i, input := range utx.Ins {
 		cred, ok := stx.Creds[i].(*secp256k1fx.Credential)
 		if !ok {
 			return fmt.Errorf("expected *secp256k1fx.Credential but got %T", cred)
@@ -213,7 +227,7 @@ func (tx *UnsignedExportTx) SemanticVerify(
 		if len(cred.Sigs) != 1 {
 			return fmt.Errorf("expected one signature for EVM Input Credential, but found: %d", len(cred.Sigs))
 		}
-		pubKeyIntf, err := vm.secpFactory.RecoverPublicKey(tx.UnsignedBytes(), cred.Sigs[0][:])
+		pubKeyIntf, err := vm.secpFactory.RecoverPublicKey(utx.Bytes(), cred.Sigs[0][:])
 		if err != nil {
 			return err
 		}
@@ -231,11 +245,11 @@ func (tx *UnsignedExportTx) SemanticVerify(
 }
 
 // AtomicOps returns the atomic operations for this transaction.
-func (tx *UnsignedExportTx) AtomicOps() (ids.ID, *atomic.Requests, error) {
-	txID := tx.ID()
+func (utx *UnsignedExportTx) AtomicOps() (ids.ID, *atomic.Requests, error) {
+	txID := utx.ID()
 
-	elems := make([]*atomic.Element, len(tx.ExportedOutputs))
-	for i, out := range tx.ExportedOutputs {
+	elems := make([]*atomic.Element, len(utx.ExportedOutputs))
+	for i, out := range utx.ExportedOutputs {
 		utxo := &djtx.UTXO{
 			UTXOID: djtx.UTXOID{
 				TxID:        txID,
@@ -261,7 +275,7 @@ func (tx *UnsignedExportTx) AtomicOps() (ids.ID, *atomic.Requests, error) {
 		elems[i] = elem
 	}
 
-	return tx.DestinationChain, &atomic.Requests{PutRequests: elems}, nil
+	return utx.DestinationChain, &atomic.Requests{PutRequests: elems}, nil
 }
 
 // newExportTx returns a new ExportTx
@@ -357,11 +371,11 @@ func (vm *VM) newExportTx(
 }
 
 // EVMStateTransfer executes the state update from the atomic export transaction
-func (tx *UnsignedExportTx) EVMStateTransfer(ctx *snow.Context, state *state.StateDB) error {
+func (utx *UnsignedExportTx) EVMStateTransfer(ctx *snow.Context, state *state.StateDB) error {
 	addrs := map[[20]byte]uint64{}
-	for _, from := range tx.Ins {
+	for _, from := range utx.Ins {
 		if from.AssetID == ctx.DJTXAssetID {
-			log.Debug("crosschain", "dest", tx.DestinationChain, "addr", from.Address, "amount", from.Amount, "assetID", "DJTX")
+			log.Debug("crosschain", "dest", utx.DestinationChain, "addr", from.Address, "amount", from.Amount, "assetID", "DJTX")
 			// We multiply the input amount by x2cRate to convert DJTX back to the appropriate
 			// denomination before export.
 			amount := new(big.Int).Mul(
@@ -371,7 +385,7 @@ func (tx *UnsignedExportTx) EVMStateTransfer(ctx *snow.Context, state *state.Sta
 			}
 			state.SubBalance(from.Address, amount)
 		} else {
-			log.Debug("crosschain", "dest", tx.DestinationChain, "addr", from.Address, "amount", from.Amount, "assetID", from.AssetID)
+			log.Debug("crosschain", "dest", utx.DestinationChain, "addr", from.Address, "amount", from.Amount, "assetID", from.AssetID)
 			amount := new(big.Int).SetUint64(from.Amount)
 			if state.GetBalanceMultiCoin(from.Address, common.Hash(from.AssetID)).Cmp(amount) < 0 {
 				return errInsufficientFunds

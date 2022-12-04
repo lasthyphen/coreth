@@ -35,8 +35,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/lasthyphen/coreth/metrics"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
 	"golang.org/x/time/rate"
 )
 
@@ -439,13 +439,13 @@ func (h *handler) handleCall(cp *callProc, msg *jsonrpcMessage) *jsonrpcMessage 
 	if callb != h.unsubscribeCb {
 		rpcRequestGauge.Inc(1)
 		if answer.Error != nil {
-			failedReqeustGauge.Inc(1)
+			failedRequestGauge.Inc(1)
 		} else {
 			successfulRequestGauge.Inc(1)
 		}
 		rpcServingTimer.UpdateSince(start)
 		if metrics.EnabledExpensive {
-			newRPCServingTimer(msg.Method, answer.Error == nil).UpdateSince(start)
+			updateServeTimeHistogram(msg.Method, answer.Error == nil, time.Since(start))
 		}
 	}
 	return answer
