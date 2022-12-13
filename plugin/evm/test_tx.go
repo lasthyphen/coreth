@@ -14,6 +14,7 @@ import (
 	"github.com/lasthyphen/dijetsnodego/codec/linearcodec"
 	"github.com/lasthyphen/dijetsnodego/ids"
 	"github.com/lasthyphen/dijetsnodego/snow"
+	"github.com/lasthyphen/dijetsnodego/utils/set"
 	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
 	"github.com/lasthyphen/coreth/core/state"
 	"github.com/lasthyphen/coreth/params"
@@ -28,7 +29,7 @@ type TestUnsignedTx struct {
 	BurnedV                     uint64 `serialize:"true"`
 	UnsignedBytesV              []byte
 	SignedBytesV                []byte
-	InputUTXOsV                 ids.Set
+	InputUTXOsV                 set.Set[ids.ID]
 	SemanticVerifyV             error
 	EVMStateTransferV           error
 }
@@ -62,7 +63,7 @@ func (t *TestUnsignedTx) Bytes() []byte { return t.UnsignedBytesV }
 func (t *TestUnsignedTx) SignedBytes() []byte { return t.SignedBytesV }
 
 // InputUTXOs implements the UnsignedAtomicTx interface
-func (t *TestUnsignedTx) InputUTXOs() ids.Set { return t.InputUTXOsV }
+func (t *TestUnsignedTx) InputUTXOs() set.Set[ids.ID] { return t.InputUTXOsV }
 
 // SemanticVerify implements the UnsignedAtomicTx interface
 func (t *TestUnsignedTx) SemanticVerify(vm *VM, stx *Tx, parent *Block, baseFee *big.Int, rules params.Rules) error {

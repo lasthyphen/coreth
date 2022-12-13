@@ -14,8 +14,10 @@ import (
 	"github.com/lasthyphen/dijetsnodego/chains/atomic"
 	"github.com/lasthyphen/dijetsnodego/ids"
 	"github.com/lasthyphen/dijetsnodego/snow"
+	"github.com/lasthyphen/dijetsnodego/utils"
 	"github.com/lasthyphen/dijetsnodego/utils/crypto"
 	"github.com/lasthyphen/dijetsnodego/utils/math"
+	"github.com/lasthyphen/dijetsnodego/utils/set"
 	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
 	"github.com/lasthyphen/dijetsnodego/vms/components/verify"
 	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
@@ -24,10 +26,10 @@ import (
 )
 
 var (
-	_                               UnsignedAtomicTx       = &UnsignedImportTx{}
-	_                               secp256k1fx.UnsignedTx = &UnsignedImportTx{}
-	errImportNonDJTXInputBlueberry                         = errors.New("import input cannot contain non-DJTX in Blueberry")
-	errImportNonDJTXOutputBlueberry                        = errors.New("import output cannot contain non-DJTX in Blueberry")
+	_                           UnsignedAtomicTx       = &UnsignedImportTx{}
+	_                           secp256k1fx.UnsignedTx = &UnsignedImportTx{}
+	errImportNonDJTXInputBanff                         = errors.New("import input cannot contain non-DJTX in Banff")
+	errImportNonDJTXOutputBanff                        = errors.New("import output cannot contain non-DJTX in Banff")
 )
 
 // UnsignedImportTx is an unsigned ImportTx
@@ -46,8 +48,8 @@ type UnsignedImportTx struct {
 }
 
 // InputUTXOs returns the UTXOIDs of the imported funds
-func (utx *UnsignedImportTx) InputUTXOs() ids.Set {
-	set := ids.NewSet(len(utx.ImportedInputs))
+func (utx *UnsignedImportTx) InputUTXOs() set.Set[ids.ID] {
+	set := set.NewSet[ids.ID](len(utx.ImportedInputs))
 	for _, in := range utx.ImportedInputs {
 		set.Add(in.InputID())
 	}
@@ -89,8 +91,8 @@ func (utx *UnsignedImportTx) Verify(
 		if err := out.Verify(); err != nil {
 			return fmt.Errorf("EVM Output failed verification: %w", err)
 		}
-		if rules.IsBlueberry && out.AssetID != ctx.DJTXAssetID {
-			return errImportNonDJTXOutputBlueberry
+		if rules.IsBanff && out.AssetID != ctx.DJTXAssetID {
+			return errImportNonDJTXOutputBanff
 		}
 	}
 
@@ -98,11 +100,11 @@ func (utx *UnsignedImportTx) Verify(
 		if err := in.Verify(); err != nil {
 			return fmt.Errorf("atomic input failed verification: %w", err)
 		}
-		if rules.IsBlueberry && in.AssetID() != ctx.DJTXAssetID {
-			return errImportNonDJTXInputBlueberry
+		if rules.IsBanff && in.AssetID() != ctx.DJTXAssetID {
+			return errImportNonDJTXInputBanff
 		}
 	}
-	if !djtx.IsSortedAndUniqueTransferableInputs(utx.ImportedInputs) {
+	if !utils.IsSortedAndUniqueSortable(utx.ImportedInputs) {
 		return errInputsNotSortedUnique
 	}
 
@@ -167,7 +169,7 @@ func (utx *UnsignedImportTx) Burned(assetID ids.ID) (uint64, error) {
 		}
 	}
 
-	return math.Sub64(input, spent)
+	return math.Sub(input, spent)
 }
 
 // SemanticVerify this transaction is valid.

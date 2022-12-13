@@ -12,8 +12,10 @@ import (
 
 	"github.com/lasthyphen/dijetsnodego/chains/atomic"
 	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodego/utils"
 	"github.com/lasthyphen/dijetsnodego/utils/constants"
 	"github.com/lasthyphen/dijetsnodego/utils/crypto"
+	"github.com/lasthyphen/dijetsnodego/utils/set"
 	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
 	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
 )
@@ -112,8 +114,8 @@ func TestImportTxVerify(t *testing.T) {
 		},
 	}
 
-	// // Sort the inputs and outputs to ensure the transaction is canonical
-	djtx.SortTransferableInputs(importTx.ImportedInputs)
+	// Sort the inputs and outputs to ensure the transaction is canonical
+	utils.Sort(importTx.ImportedInputs)
 	SortEVMOutputs(importTx.Outs)
 
 	tests := map[string]atomicTxVerifyTest{
@@ -134,13 +136,13 @@ func TestImportTxVerify(t *testing.T) {
 			rules:       apricotRulesPhase0,
 			expectedErr: "", // Expect this transaction to be valid in Apricot Phase 0
 		},
-		"valid import tx blueberry": {
+		"valid import tx banff": {
 			generate: func(t *testing.T) UnsignedAtomicTx {
 				return importTx
 			},
 			ctx:         ctx,
-			rules:       blueberryRules,
-			expectedErr: "", // Expect this transaction to be valid in Blueberry
+			rules:       banffRules,
+			expectedErr: "", // Expect this transaction to be valid in Banff
 		},
 		"invalid network ID": {
 			generate: func(t *testing.T) UnsignedAtomicTx {
@@ -371,7 +373,7 @@ func TestImportTxVerify(t *testing.T) {
 			rules:       apricotRulesPhase6,
 			expectedErr: "",
 		},
-		"non-DJTX input Blueberry": {
+		"non-DJTX input Banff": {
 			generate: func(t *testing.T) UnsignedAtomicTx {
 				tx := *importTx
 				tx.ImportedInputs = []*djtx.TransferableInput{
@@ -392,10 +394,10 @@ func TestImportTxVerify(t *testing.T) {
 				return &tx
 			},
 			ctx:         ctx,
-			rules:       blueberryRules,
-			expectedErr: errImportNonDJTXInputBlueberry.Error(),
+			rules:       banffRules,
+			expectedErr: errImportNonDJTXInputBanff.Error(),
 		},
-		"non-DJTX output Blueberry": {
+		"non-DJTX output Banff": {
 			generate: func(t *testing.T) UnsignedAtomicTx {
 				tx := *importTx
 				tx.Outs = []EVMOutput{
@@ -408,8 +410,8 @@ func TestImportTxVerify(t *testing.T) {
 				return &tx
 			},
 			ctx:         ctx,
-			rules:       blueberryRules,
-			expectedErr: errImportNonDJTXOutputBlueberry.Error(),
+			rules:       banffRules,
+			expectedErr: errImportNonDJTXOutputBanff.Error(),
 		},
 	}
 	for name, test := range tests {
@@ -476,7 +478,7 @@ func TestNewImportTx(t *testing.T) {
 		}
 
 		// Ensure that the UTXO has been removed from shared memory within Accept
-		addrSet := ids.ShortSet{}
+		addrSet := set.Set[ids.ShortID]{}
 		addrSet.Add(testShortIDAddrs[0])
 		utxos, _, _, err := vm.GetAtomicUTXOs(vm.ctx.XChainID, addrSet, ids.ShortEmpty, ids.Empty, -1)
 		if err != nil {

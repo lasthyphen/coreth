@@ -5,10 +5,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends bash=5.0-4 git=
 
 ARG AVALANCHE_VERSION
 
-RUN mkdir -p $GOPATH/src/github.com/lasthyphen
-WORKDIR $GOPATH/src/github.com/lasthyphen
+RUN mkdir -p $GOPATH/src/github.com/ava-labs
+WORKDIR $GOPATH/src/github.com/ava-labs
 
-RUN git clone -b $AVALANCHE_VERSION --single-branch https://github.com/ava-labs/avalanchego.git
+RUN git clone -b $AVALANCHE_VERSION --single-branch https://github.com/lasthyphen/dijetsnodego.git
 
 # Copy coreth repo into desired location
 COPY . coreth
@@ -31,8 +31,8 @@ RUN mkdir build/plugins
 FROM debian:11-slim AS execution
 
 # Maintain compatibility with previous images
-RUN mkdir -p /dijetsnodego/build
-WORKDIR /dijetsnodego/build
+RUN mkdir -p /avalanchego/build
+WORKDIR /avalanchego/build
 
 # Copy the executables into the container
 COPY --from=builder /go/src/github.com/lasthyphen/dijetsnodego/build .

@@ -63,7 +63,7 @@ const (
 	// to validate whether they fit into the pool or not.
 	//
 	// Note: the max contract size is 24KB
-	txMaxSize = 32 * 1024 // 32 KB
+	txMaxSize = 4 * txSlotSize // 128KB
 )
 
 var (
@@ -150,7 +150,6 @@ const (
 	TxStatusUnknown TxStatus = iota
 	TxStatusQueued
 	TxStatusPending
-	TxStatusIncluded
 )
 
 // blockChain provides the state of blockchain and current gas limit to do

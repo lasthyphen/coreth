@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodego/utils/set"
 	"github.com/lasthyphen/coreth/core/rawdb"
 	"github.com/lasthyphen/coreth/ethdb"
 	"github.com/lasthyphen/coreth/params"
@@ -45,7 +46,7 @@ type codeSyncer struct {
 
 	CodeSyncerConfig
 
-	outstandingCodeHashes ids.Set          // Set of code hashes that we need to fetch from the network.
+	outstandingCodeHashes set.Set[ids.ID]  // Set of code hashes that we need to fetch from the network.
 	codeHashes            chan common.Hash // Channel of incoming code hash requests
 
 	// Used to set terminal error or pass nil to [errChan] if successful.
@@ -62,7 +63,7 @@ func newCodeSyncer(config CodeSyncerConfig) *codeSyncer {
 	return &codeSyncer{
 		CodeSyncerConfig:      config,
 		codeHashes:            make(chan common.Hash, config.MaxOutstandingCodeHashes),
-		outstandingCodeHashes: ids.NewSet(0),
+		outstandingCodeHashes: set.NewSet[ids.ID](0),
 		errChan:               make(chan error, 1),
 	}
 }

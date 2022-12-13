@@ -17,6 +17,7 @@ import (
 	"github.com/lasthyphen/dijetsnodego/utils/constants"
 	"github.com/lasthyphen/dijetsnodego/utils/crypto"
 	"github.com/lasthyphen/dijetsnodego/utils/math"
+	"github.com/lasthyphen/dijetsnodego/utils/set"
 	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
 	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
 	"github.com/lasthyphen/dijetsnodego/vms/components/verify"
@@ -26,10 +27,10 @@ import (
 )
 
 var (
-	_                               UnsignedAtomicTx       = &UnsignedExportTx{}
-	_                               secp256k1fx.UnsignedTx = &UnsignedExportTx{}
-	errExportNonDJTXInputBlueberry                         = errors.New("export input cannot contain non-DJTX in Blueberry")
-	errExportNonDJTXOutputBlueberry                        = errors.New("export output cannot contain non-DJTX in Blueberry")
+	_                           UnsignedAtomicTx       = &UnsignedExportTx{}
+	_                           secp256k1fx.UnsignedTx = &UnsignedExportTx{}
+	errExportNonDJTXInputBanff                         = errors.New("export input cannot contain non-DJTX in Banff")
+	errExportNonDJTXOutputBanff                        = errors.New("export output cannot contain non-DJTX in Banff")
 )
 
 // UnsignedExportTx is an unsigned ExportTx
@@ -48,8 +49,8 @@ type UnsignedExportTx struct {
 }
 
 // InputUTXOs returns a set of all the hash(address:nonce) exporting funds.
-func (utx *UnsignedExportTx) InputUTXOs() ids.Set {
-	set := ids.NewSet(len(utx.Ins))
+func (utx *UnsignedExportTx) InputUTXOs() set.Set[ids.ID] {
+	set := set.NewSet[ids.ID](len(utx.Ins))
 	for _, in := range utx.Ins {
 		// Total populated bytes is exactly 32 bytes.
 		// 8 (Nonce) + 4 (Address Length) + 20 (Address)
@@ -95,8 +96,8 @@ func (utx *UnsignedExportTx) Verify(
 		if err := in.Verify(); err != nil {
 			return err
 		}
-		if rules.IsBlueberry && in.AssetID != ctx.DJTXAssetID {
-			return errExportNonDJTXInputBlueberry
+		if rules.IsBanff && in.AssetID != ctx.DJTXAssetID {
+			return errExportNonDJTXInputBanff
 		}
 	}
 
@@ -108,8 +109,8 @@ func (utx *UnsignedExportTx) Verify(
 		if assetID != ctx.DJTXAssetID && utx.DestinationChain == constants.PlatformChainID {
 			return errWrongChainID
 		}
-		if rules.IsBlueberry && assetID != ctx.DJTXAssetID {
-			return errExportNonDJTXOutputBlueberry
+		if rules.IsBanff && assetID != ctx.DJTXAssetID {
+			return errExportNonDJTXOutputBanff
 		}
 	}
 	if !djtx.IsSortedTransferableOutputs(utx.ExportedOutputs, Codec) {
@@ -167,7 +168,7 @@ func (utx *UnsignedExportTx) Burned(assetID ids.ID) (uint64, error) {
 		}
 	}
 
-	return math.Sub64(input, spent)
+	return math.Sub(input, spent)
 }
 
 // SemanticVerify this transaction is valid.
@@ -287,7 +288,7 @@ func (vm *VM) newExportTx(
 	baseFee *big.Int, // fee to use post-AP3
 	keys []*crypto.PrivateKeySECP256K1R, // Pay the fee and provide the tokens
 ) (*Tx, error) {
-	outs := []*djtx.TransferableOutput{{ // Exported to X-Chain
+	outs := []*djtx.TransferableOutput{{
 		Asset: djtx.Asset{ID: assetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: amount,

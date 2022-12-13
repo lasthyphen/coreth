@@ -34,6 +34,7 @@ import (
 
 	"github.com/lasthyphen/coreth/core"
 	"github.com/lasthyphen/coreth/core/types"
+	"github.com/stretchr/testify/require"
 
 	"github.com/lasthyphen/coreth/params"
 	"github.com/lasthyphen/coreth/rpc"
@@ -105,7 +106,8 @@ func TestFeeHistory(t *testing.T) {
 			}
 			b.AddTx(tx)
 		})
-		oracle := NewOracle(backend, config)
+		oracle, err := NewOracle(backend, config)
+		require.NoError(t, err)
 
 		first, reward, baseFee, ratio, err := oracle.FeeHistory(context.Background(), c.count, c.last, c.percent)
 

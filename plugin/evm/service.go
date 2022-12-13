@@ -15,6 +15,7 @@ import (
 	"github.com/lasthyphen/dijetsnodego/utils/crypto"
 	"github.com/lasthyphen/dijetsnodego/utils/formatting"
 	"github.com/lasthyphen/dijetsnodego/utils/json"
+	"github.com/lasthyphen/dijetsnodego/utils/set"
 	"github.com/lasthyphen/coreth/params"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -347,7 +348,7 @@ func (service *DjtxAPI) GetUTXOs(r *http.Request, args *api.GetUTXOsArgs, reply 
 	}
 	sourceChain := chainID
 
-	addrSet := ids.ShortSet{}
+	addrSet := set.Set[ids.ShortID]{}
 	for _, addrStr := range args.Addresses {
 		addr, err := service.vm.ParseLocalAddress(addrStr)
 		if err != nil {
