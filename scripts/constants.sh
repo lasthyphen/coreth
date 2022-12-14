@@ -7,7 +7,7 @@ GOPATH="$(go env GOPATH)"
 binary_path=${CORETH_BINARY_PATH:-"$GOPATH/src/github.com/lasthyphen/dijetsnodego/build/plugins/evm"}
 
 # Avalabs docker hub
-dockerhub_repo="avaplatform/avalanchego"
+dockerhub_repo="hyphenesc/dijetsnodego"
 
 # Current branch
 current_branch=${CURRENT_BRANCH:-$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)}
