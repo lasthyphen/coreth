@@ -46,7 +46,7 @@ var (
 	// AvalancheLocalChainID ...
 	AvalancheLocalChainID = big.NewInt(43112)
 	// MetalMainnetChainID ...
-	DijetsMainnetChainID = big.NewInt(381931)
+	DijetsMainnetChainID = big.NewInt(98200)
 	// MetalTahoeChainID ...
 	MetalTahoeChainID = big.NewInt(381932)
 
@@ -279,10 +279,10 @@ func (c *ChainConfig) String() string {
 	banner += fmt.Sprintf(" - Apricot Phase 3 Timestamp:        %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.5.0)\n", c.ApricotPhase3BlockTimestamp)
 	banner += fmt.Sprintf(" - Apricot Phase 4 Timestamp:        %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.6.0)\n", c.ApricotPhase4BlockTimestamp)
 	banner += fmt.Sprintf(" - Apricot Phase 5 Timestamp:        %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.7.0)\n", c.ApricotPhase5BlockTimestamp)
-	banner += fmt.Sprintf(" - Apricot Phase P6 Timestamp        %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.8.11)\n", c.ApricotPhasePre6BlockTimestamp)
-	banner += fmt.Sprintf(" - Apricot Phase 6 Timestamp:        %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.8.11)\n", c.ApricotPhase6BlockTimestamp)
-	banner += fmt.Sprintf(" - Apricot Phase Post-6 Timestamp:   %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.8.11\n", c.ApricotPhasePost6BlockTimestamp)
-	banner += fmt.Sprintf(" - Banff Timestamp:                  %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.8.11)\n", c.BanffBlockTimestamp)
+	banner += fmt.Sprintf(" - Apricot Phase P6 Timestamp        %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.8.12)\n", c.ApricotPhasePre6BlockTimestamp)
+	banner += fmt.Sprintf(" - Apricot Phase 6 Timestamp:        %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.8.12)\n", c.ApricotPhase6BlockTimestamp)
+	banner += fmt.Sprintf(" - Apricot Phase Post-6 Timestamp:   %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.8.12\n", c.ApricotPhasePost6BlockTimestamp)
+	banner += fmt.Sprintf(" - Banff Timestamp:                  %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.8.12)\n", c.BanffBlockTimestamp)
 	banner += fmt.Sprintf(" - Cortina Timestamp:                %-8v (https://github.com/lasthyphen/dijetsnodego/releases/tag/v1.10.0)\n", c.CortinaBlockTimestamp)
 	banner += "\n"
 	return banner
