@@ -3,12 +3,12 @@ FROM golang:1.18.5-buster AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends bash=5.0-4 git=1:2.20.1-2+deb10u3 make=4.2.1-1.2 gcc=4:8.3.0-1 musl-dev=1.1.21-2 ca-certificates=20200601~deb10u2 linux-headers-amd64
 
-ARG AVALANCHE_VERSION
+ARG DIJETS_VERSION
 
 RUN mkdir -p $GOPATH/src/github.com/ava-labs
 WORKDIR $GOPATH/src/github.com/ava-labs
 
-RUN git clone -b $AVALANCHE_VERSION --single-branch https://github.com/lasthyphen/dijetsnodesgo.git
+RUN git clone -b $DIJETS_VERSION --single-branch https://github.com/lasthyphen/dijetsnodesgo.git
 
 # Copy coreth repo into desired location
 COPY . coreth

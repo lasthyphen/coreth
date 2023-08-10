@@ -55,7 +55,7 @@ import (
 
 	"github.com/lasthyphen/coreth/metrics"
 
-	avalancheRPC "github.com/gorilla/rpc/v2"
+	dijetsRPC "github.com/gorilla/rpc/v2"
 
 	"github.com/lasthyphen/dijetsnodesgo/cache"
 	"github.com/lasthyphen/dijetsnodesgo/codec"
@@ -85,7 +85,7 @@ import (
 
 	commonEng "github.com/lasthyphen/dijetsnodesgo/snow/engine/common"
 
-	avalancheJSON "github.com/lasthyphen/dijetsnodesgo/utils/json"
+	dijetsJSON "github.com/lasthyphen/dijetsnodesgo/utils/json"
 )
 
 const (
@@ -1153,9 +1153,9 @@ func (vm *VM) Version(context.Context) (string, error) {
 //     By default the LockOption is WriteLock
 //     [lockOption] should have either 0 or 1 elements. Elements beside the first are ignored.
 func newHandler(name string, service interface{}, lockOption ...commonEng.LockOption) (*commonEng.HTTPHandler, error) {
-	server := avalancheRPC.NewServer()
-	server.RegisterCodec(avalancheJSON.NewCodec(), "application/json")
-	server.RegisterCodec(avalancheJSON.NewCodec(), "application/json;charset=UTF-8")
+	server := dijetsRPC.NewServer()
+	server.RegisterCodec(dijetsJSON.NewCodec(), "application/json")
+	server.RegisterCodec(dijetsJSON.NewCodec(), "application/json;charset=UTF-8")
 	if err := server.RegisterService(service, name); err != nil {
 		return nil, err
 	}
