@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/lasthyphen/dijetsnodego/api"
-	"github.com/lasthyphen/dijetsnodego/utils/profiler"
+	"github.com/lasthyphen/dijetsnodesgo/api"
+	"github.com/lasthyphen/dijetsnodesgo/utils/profiler"
 	"github.com/ethereum/go-ethereum/log"
 )
 

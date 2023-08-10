@@ -6,11 +6,11 @@ package evm
 import (
 	"testing"
 
-	"github.com/lasthyphen/dijetsnodego/chains/atomic"
-	"github.com/lasthyphen/dijetsnodego/database/memdb"
-	"github.com/lasthyphen/dijetsnodego/database/versiondb"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils"
+	"github.com/lasthyphen/dijetsnodesgo/chains/atomic"
+	"github.com/lasthyphen/dijetsnodesgo/database/memdb"
+	"github.com/lasthyphen/dijetsnodesgo/database/versiondb"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

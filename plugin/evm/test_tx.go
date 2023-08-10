@@ -7,15 +7,15 @@ import (
 	"math/big"
 	"math/rand"
 
-	"github.com/lasthyphen/dijetsnodego/utils"
+	"github.com/lasthyphen/dijetsnodesgo/utils"
 
-	"github.com/lasthyphen/dijetsnodego/chains/atomic"
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/codec/linearcodec"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/snow"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/chains/atomic"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/codec/linearcodec"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/snow"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 	"github.com/lasthyphen/coreth/core/state"
 	"github.com/lasthyphen/coreth/params"
 )

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
 
 	"github.com/stretchr/testify/assert"
 

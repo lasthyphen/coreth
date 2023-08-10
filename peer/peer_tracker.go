@@ -8,10 +8,10 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
-	utils_math "github.com/lasthyphen/dijetsnodego/utils/math"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
-	"github.com/lasthyphen/dijetsnodego/version"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	utils_math "github.com/lasthyphen/dijetsnodesgo/utils/math"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/version"
 
 	"github.com/ethereum/go-ethereum/log"
 

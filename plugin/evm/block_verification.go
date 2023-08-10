@@ -9,7 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	safemath "github.com/lasthyphen/dijetsnodego/utils/math"
+	safemath "github.com/lasthyphen/dijetsnodesgo/utils/math"
 
 	"github.com/lasthyphen/coreth/constants"
 	"github.com/lasthyphen/coreth/core/types"

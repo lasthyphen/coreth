@@ -9,14 +9,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lasthyphen/dijetsnodego/codec"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
 
 	"github.com/lasthyphen/coreth/peer"
 
-	"github.com/lasthyphen/dijetsnodego/cache"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/snow"
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/cache"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/snow"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"

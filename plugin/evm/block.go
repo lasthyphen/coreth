@@ -15,8 +15,8 @@ import (
 
 	"github.com/lasthyphen/coreth/core/types"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/snow/choices"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/snow/choices"
 )
 
 var (

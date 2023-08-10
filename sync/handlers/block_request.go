@@ -8,8 +8,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 
 	"github.com/lasthyphen/coreth/peer"
 	"github.com/lasthyphen/coreth/plugin/evm/message"

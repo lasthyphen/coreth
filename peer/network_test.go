@@ -12,17 +12,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lasthyphen/dijetsnodego/snow/engine/common"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/snow/engine/common"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
 
 	"github.com/lasthyphen/coreth/plugin/evm/message"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/codec/linearcodec"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/version"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/codec/linearcodec"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/version"
 )
 
 var (

@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/lasthyphen/dijetsnodego/database/encdb"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils/crypto"
+	"github.com/lasthyphen/dijetsnodesgo/database/encdb"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils/crypto"
 	"github.com/ethereum/go-ethereum/common"
 )
 

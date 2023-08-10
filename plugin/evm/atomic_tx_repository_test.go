@@ -9,20 +9,20 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/lasthyphen/dijetsnodego/chains/atomic"
-	"github.com/lasthyphen/dijetsnodego/database"
-	"github.com/lasthyphen/dijetsnodego/database/prefixdb"
-	"github.com/lasthyphen/dijetsnodego/database/versiondb"
+	"github.com/lasthyphen/dijetsnodesgo/chains/atomic"
+	"github.com/lasthyphen/dijetsnodesgo/database"
+	"github.com/lasthyphen/dijetsnodesgo/database/prefixdb"
+	"github.com/lasthyphen/dijetsnodesgo/database/versiondb"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/lasthyphen/dijetsnodego/database/memdb"
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/database/memdb"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 )
 
 // addTxs writes [txsPerHeight] txs for heights ranging in [fromHeight, toHeight) directly to [acceptedAtomicTxDB],

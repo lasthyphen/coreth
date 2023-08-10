@@ -7,8 +7,8 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/lasthyphen/dijetsnodego/utils"
-	"github.com/lasthyphen/dijetsnodego/utils/units"
+	"github.com/lasthyphen/dijetsnodesgo/utils"
+	"github.com/lasthyphen/dijetsnodesgo/utils/units"
 
 	"github.com/stretchr/testify/assert"
 )

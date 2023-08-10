@@ -6,8 +6,8 @@ package handlers
 import (
 	"context"
 
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 	"github.com/lasthyphen/coreth/core/state/snapshot"
 	"github.com/lasthyphen/coreth/core/types"
 	"github.com/lasthyphen/coreth/plugin/evm/message"

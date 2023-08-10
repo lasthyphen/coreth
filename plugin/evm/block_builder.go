@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lasthyphen/dijetsnodego/utils/timer"
+	"github.com/lasthyphen/dijetsnodesgo/utils/timer"
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/dijetsnodego/snow"
-	commonEng "github.com/lasthyphen/dijetsnodego/snow/engine/common"
+	"github.com/lasthyphen/dijetsnodesgo/snow"
+	commonEng "github.com/lasthyphen/dijetsnodesgo/snow/engine/common"
 	"github.com/lasthyphen/coreth/core"
 	"github.com/ethereum/go-ethereum/log"
 )

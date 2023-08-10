@@ -11,8 +11,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/lasthyphen/dijetsnodego/database/memdb"
-	"github.com/lasthyphen/dijetsnodego/database/versiondb"
+	"github.com/lasthyphen/dijetsnodesgo/database/memdb"
+	"github.com/lasthyphen/dijetsnodesgo/database/versiondb"
 
 	"github.com/lasthyphen/coreth/ethdb/memorydb"
 	"github.com/lasthyphen/coreth/plugin/evm/message"

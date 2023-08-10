@@ -6,10 +6,10 @@ package evm
 import (
 	"fmt"
 
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/codec/linearcodec"
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
-	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/codec/linearcodec"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/vms/secp256k1fx"
 )
 
 // Codec does serialization and deserialization

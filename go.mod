@@ -18,7 +18,6 @@ require (
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.2.0
-	github.com/lasthyphen/dijetsnodego v1.8.14
 	github.com/mattn/go-colorable v0.1.12
 	github.com/mattn/go-isatty v0.0.14
 	github.com/olekukonko/tablewriter v0.0.5
@@ -45,7 +44,7 @@ require (
 require (
 	github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec // indirect
 	github.com/aead/siphash v1.0.1 // indirect
-	github.com/lasthyphen/djiets-ledger-go v0.0.19 // indirect
+	github.com/lasthyphen/djiets-ledger-go v0.0.20 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.23.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect

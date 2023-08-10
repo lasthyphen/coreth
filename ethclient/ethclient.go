@@ -34,7 +34,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 	"github.com/lasthyphen/coreth/accounts/abi/bind"
 	"github.com/lasthyphen/coreth/core/types"
 	"github.com/lasthyphen/coreth/interfaces"

@@ -13,13 +13,13 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/database"
-	"github.com/lasthyphen/dijetsnodego/database/prefixdb"
-	"github.com/lasthyphen/dijetsnodego/database/versiondb"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils/units"
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/database"
+	"github.com/lasthyphen/dijetsnodesgo/database/prefixdb"
+	"github.com/lasthyphen/dijetsnodesgo/database/versiondb"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils/units"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 )
 
 const (

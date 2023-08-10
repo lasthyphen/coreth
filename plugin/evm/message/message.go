@@ -7,12 +7,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/lasthyphen/dijetsnodego/codec"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils/units"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils/units"
 )
 
 const (

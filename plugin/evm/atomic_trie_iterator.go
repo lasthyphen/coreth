@@ -7,10 +7,10 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/lasthyphen/dijetsnodego/chains/atomic"
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/chains/atomic"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 
 	"github.com/lasthyphen/coreth/trie"
 	"github.com/ethereum/go-ethereum/common"

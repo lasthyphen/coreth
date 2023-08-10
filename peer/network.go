@@ -14,12 +14,12 @@ import (
 
 	"github.com/ethereum/go-ethereum/log"
 
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/snow/engine/common"
-	"github.com/lasthyphen/dijetsnodego/snow/validators"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
-	"github.com/lasthyphen/dijetsnodego/version"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/snow/engine/common"
+	"github.com/lasthyphen/dijetsnodesgo/snow/validators"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/version"
 
 	"github.com/lasthyphen/coreth/peer/stats"
 	"github.com/lasthyphen/coreth/plugin/evm/message"

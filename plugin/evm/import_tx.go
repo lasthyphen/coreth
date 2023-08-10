@@ -11,16 +11,16 @@ import (
 	"github.com/lasthyphen/coreth/core/state"
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/dijetsnodego/chains/atomic"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/snow"
-	"github.com/lasthyphen/dijetsnodego/utils"
-	"github.com/lasthyphen/dijetsnodego/utils/crypto"
-	"github.com/lasthyphen/dijetsnodego/utils/math"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
-	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
-	"github.com/lasthyphen/dijetsnodego/vms/components/verify"
-	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodesgo/chains/atomic"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/snow"
+	"github.com/lasthyphen/dijetsnodesgo/utils"
+	"github.com/lasthyphen/dijetsnodesgo/utils/crypto"
+	"github.com/lasthyphen/dijetsnodesgo/utils/math"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/vms/components/djtx"
+	"github.com/lasthyphen/dijetsnodesgo/vms/components/verify"
+	"github.com/lasthyphen/dijetsnodesgo/vms/secp256k1fx"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )
@@ -429,7 +429,7 @@ func (vm *VM) newImportTxWithUTXOs(
 func (utx *UnsignedImportTx) EVMStateTransfer(ctx *snow.Context, state *state.StateDB) error {
 	for _, to := range utx.Outs {
 		if to.AssetID == ctx.DJTXAssetID {
-			log.Debug("crosschain", "src", utx.SourceChain, "addr", to.Address, "amount", to.Amount, "assetID", "DJTX")
+			log.Debug("crosschain", "src", utx.SourceChain, "addr", to.Address, "amount", to.Amount, "assetID", "DJT")
 			// If the asset is DJTX, convert the input amount in nDJTX to gWei by
 			// multiplying by the x2c rate.
 			amount := new(big.Int).Mul(

@@ -6,10 +6,10 @@ package statesyncclient
 import (
 	"errors"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 	"github.com/lasthyphen/coreth/peer"
 
-	"github.com/lasthyphen/dijetsnodego/version"
+	"github.com/lasthyphen/dijetsnodesgo/version"
 )
 
 var _ peer.NetworkClient = &mockNetwork{}

@@ -10,7 +10,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 	"github.com/lasthyphen/coreth/accounts/keystore"
 	"github.com/lasthyphen/coreth/core/types"
 

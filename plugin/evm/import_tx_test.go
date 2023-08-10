@@ -10,14 +10,14 @@ import (
 	"github.com/lasthyphen/coreth/params"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/lasthyphen/dijetsnodego/chains/atomic"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils"
-	"github.com/lasthyphen/dijetsnodego/utils/constants"
-	"github.com/lasthyphen/dijetsnodego/utils/crypto"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
-	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
-	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodesgo/chains/atomic"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils"
+	"github.com/lasthyphen/dijetsnodesgo/utils/constants"
+	"github.com/lasthyphen/dijetsnodesgo/utils/crypto"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/vms/components/djtx"
+	"github.com/lasthyphen/dijetsnodesgo/vms/secp256k1fx"
 )
 
 // createImportTxOptions adds a UTXO to shared memory and generates a list of import transactions sending this UTXO

@@ -4,7 +4,7 @@
 package peer
 
 import (
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 	"github.com/lasthyphen/coreth/plugin/evm/message"
 )
 

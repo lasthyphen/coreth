@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	utils_math "github.com/lasthyphen/dijetsnodego/utils/math"
+	utils_math "github.com/lasthyphen/dijetsnodesgo/utils/math"
 	"github.com/lasthyphen/coreth/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"

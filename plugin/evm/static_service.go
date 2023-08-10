@@ -7,7 +7,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/lasthyphen/dijetsnodego/utils/formatting"
+	"github.com/lasthyphen/dijetsnodesgo/utils/formatting"
 	"github.com/lasthyphen/coreth/core"
 )
 

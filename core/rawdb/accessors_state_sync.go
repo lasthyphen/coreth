@@ -6,7 +6,7 @@ package rawdb
 import (
 	"encoding/binary"
 
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 	"github.com/lasthyphen/coreth/ethdb"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"

@@ -33,7 +33,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 	"github.com/lasthyphen/coreth/accounts"
 	"github.com/lasthyphen/coreth/accounts/abi"
 	"github.com/lasthyphen/coreth/accounts/keystore"

@@ -11,17 +11,17 @@ import (
 	"github.com/lasthyphen/coreth/core/state"
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/dijetsnodego/chains/atomic"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/snow"
-	"github.com/lasthyphen/dijetsnodego/utils/constants"
-	"github.com/lasthyphen/dijetsnodego/utils/crypto"
-	"github.com/lasthyphen/dijetsnodego/utils/math"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
-	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
-	"github.com/lasthyphen/dijetsnodego/vms/components/verify"
-	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodesgo/chains/atomic"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/snow"
+	"github.com/lasthyphen/dijetsnodesgo/utils/constants"
+	"github.com/lasthyphen/dijetsnodesgo/utils/crypto"
+	"github.com/lasthyphen/dijetsnodesgo/utils/math"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/vms/components/djtx"
+	"github.com/lasthyphen/dijetsnodesgo/vms/components/verify"
+	"github.com/lasthyphen/dijetsnodesgo/vms/secp256k1fx"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )
@@ -376,7 +376,7 @@ func (utx *UnsignedExportTx) EVMStateTransfer(ctx *snow.Context, state *state.St
 	addrs := map[[20]byte]uint64{}
 	for _, from := range utx.Ins {
 		if from.AssetID == ctx.DJTXAssetID {
-			log.Debug("crosschain", "dest", utx.DestinationChain, "addr", from.Address, "amount", from.Amount, "assetID", "DJTX")
+			log.Debug("crosschain", "dest", utx.DestinationChain, "addr", from.Address, "amount", from.Amount, "assetID", "DJT")
 			// We multiply the input amount by x2cRate to convert DJTX back to the appropriate
 			// denomination before export.
 			amount := new(big.Int).Mul(

@@ -11,14 +11,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 
 	"github.com/lasthyphen/coreth/ethdb/memorydb"
 	"github.com/lasthyphen/coreth/params"
 	"github.com/lasthyphen/coreth/sync/client/stats"
 
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/version"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/version"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"

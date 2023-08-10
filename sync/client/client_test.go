@@ -13,7 +13,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 
 	"github.com/lasthyphen/coreth/consensus/dummy"
 	"github.com/lasthyphen/coreth/core"

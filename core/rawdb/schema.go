@@ -31,7 +31,7 @@ import (
 	"bytes"
 	"encoding/binary"
 
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 	"github.com/lasthyphen/coreth/metrics"
 	"github.com/ethereum/go-ethereum/common"
 )

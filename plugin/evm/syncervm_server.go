@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lasthyphen/dijetsnodego/database"
-	"github.com/lasthyphen/dijetsnodego/snow/engine/snowman/block"
+	"github.com/lasthyphen/dijetsnodesgo/database"
+	"github.com/lasthyphen/dijetsnodesgo/snow/engine/snowman/block"
 
 	"github.com/lasthyphen/coreth/core"
 	"github.com/lasthyphen/coreth/plugin/evm/message"

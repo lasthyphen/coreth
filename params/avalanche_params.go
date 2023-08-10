@@ -6,7 +6,7 @@ package params
 import (
 	"math/big"
 
-	"github.com/lasthyphen/dijetsnodego/utils/units"
+	"github.com/lasthyphen/dijetsnodesgo/utils/units"
 )
 
 // Minimum Gas Price

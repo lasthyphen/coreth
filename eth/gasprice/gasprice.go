@@ -32,7 +32,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/lasthyphen/dijetsnodego/utils/timer/mockable"
+	"github.com/lasthyphen/dijetsnodesgo/utils/timer/mockable"
 	"github.com/lasthyphen/coreth/consensus/dummy"
 	"github.com/lasthyphen/coreth/core"
 	"github.com/lasthyphen/coreth/core/types"

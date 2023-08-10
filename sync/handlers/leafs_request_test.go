@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 	"github.com/lasthyphen/coreth/core/rawdb"
 	"github.com/lasthyphen/coreth/core/state/snapshot"
 	"github.com/lasthyphen/coreth/core/types"

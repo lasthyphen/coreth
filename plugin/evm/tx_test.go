@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lasthyphen/dijetsnodego/chains/atomic"
-	"github.com/lasthyphen/dijetsnodego/snow"
+	"github.com/lasthyphen/dijetsnodesgo/chains/atomic"
+	"github.com/lasthyphen/dijetsnodesgo/snow"
 	"github.com/lasthyphen/coreth/params"
 	"github.com/stretchr/testify/require"
 )

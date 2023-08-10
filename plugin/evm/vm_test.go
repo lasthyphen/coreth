@@ -27,27 +27,27 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/lasthyphen/dijetsnodego/api/keystore"
-	"github.com/lasthyphen/dijetsnodego/chains/atomic"
-	"github.com/lasthyphen/dijetsnodego/database/manager"
-	"github.com/lasthyphen/dijetsnodego/database/prefixdb"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/snow"
-	"github.com/lasthyphen/dijetsnodego/snow/choices"
-	"github.com/lasthyphen/dijetsnodego/utils/cb58"
-	"github.com/lasthyphen/dijetsnodego/utils/constants"
-	"github.com/lasthyphen/dijetsnodego/utils/crypto"
-	"github.com/lasthyphen/dijetsnodego/utils/formatting"
-	"github.com/lasthyphen/dijetsnodego/utils/hashing"
-	"github.com/lasthyphen/dijetsnodego/utils/logging"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
-	"github.com/lasthyphen/dijetsnodego/utils/units"
-	"github.com/lasthyphen/dijetsnodego/version"
-	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
-	"github.com/lasthyphen/dijetsnodego/vms/components/chain"
-	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodesgo/api/keystore"
+	"github.com/lasthyphen/dijetsnodesgo/chains/atomic"
+	"github.com/lasthyphen/dijetsnodesgo/database/manager"
+	"github.com/lasthyphen/dijetsnodesgo/database/prefixdb"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/snow"
+	"github.com/lasthyphen/dijetsnodesgo/snow/choices"
+	"github.com/lasthyphen/dijetsnodesgo/utils/cb58"
+	"github.com/lasthyphen/dijetsnodesgo/utils/constants"
+	"github.com/lasthyphen/dijetsnodesgo/utils/crypto"
+	"github.com/lasthyphen/dijetsnodesgo/utils/formatting"
+	"github.com/lasthyphen/dijetsnodesgo/utils/hashing"
+	"github.com/lasthyphen/dijetsnodesgo/utils/logging"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/utils/units"
+	"github.com/lasthyphen/dijetsnodesgo/version"
+	"github.com/lasthyphen/dijetsnodesgo/vms/components/djtx"
+	"github.com/lasthyphen/dijetsnodesgo/vms/components/chain"
+	"github.com/lasthyphen/dijetsnodesgo/vms/secp256k1fx"
 
-	engCommon "github.com/lasthyphen/dijetsnodego/snow/engine/common"
+	engCommon "github.com/lasthyphen/dijetsnodesgo/snow/engine/common"
 
 	"github.com/lasthyphen/coreth/consensus/dummy"
 	"github.com/lasthyphen/coreth/core"
@@ -144,9 +144,9 @@ func NewContext() *snow.Context {
 	ctx.XChainID = testXChainID
 	ctx.SharedMemory = testSharedMemory()
 	aliaser := ctx.BCLookup.(ids.Aliaser)
-	_ = aliaser.Alias(testCChainID, "C")
+	_ = aliaser.Alias(testCChainID, "U")
 	_ = aliaser.Alias(testCChainID, testCChainID.String())
-	_ = aliaser.Alias(testXChainID, "X")
+	_ = aliaser.Alias(testXChainID, "V")
 	_ = aliaser.Alias(testXChainID, testXChainID.String())
 	ctx.SNLookup = &snLookup{
 		chainsToSubnet: map[ids.ID]ids.ID{

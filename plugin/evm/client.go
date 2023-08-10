@@ -9,13 +9,13 @@ import (
 
 	"github.com/ethereum/go-ethereum/log"
 
-	"github.com/lasthyphen/dijetsnodego/api"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils/crypto"
-	"github.com/lasthyphen/dijetsnodego/utils/formatting"
-	"github.com/lasthyphen/dijetsnodego/utils/rpc"
+	"github.com/lasthyphen/dijetsnodesgo/api"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils/crypto"
+	"github.com/lasthyphen/dijetsnodesgo/utils/formatting"
+	"github.com/lasthyphen/dijetsnodesgo/utils/rpc"
 
-	cjson "github.com/lasthyphen/dijetsnodego/utils/json"
+	cjson "github.com/lasthyphen/dijetsnodesgo/utils/json"
 )
 
 // Interface compliance
@@ -57,7 +57,7 @@ func NewClient(uri, chain string) Client {
 
 // NewCChainClient returns a Client for interacting with the C Chain
 func NewCChainClient(uri string) Client {
-	return NewClient(uri, "C")
+	return NewClient(uri, "U")
 }
 
 // IssueTx issues a transaction to a node and returns the TxID
@@ -174,7 +174,7 @@ func (c *client) ExportDJTX(
 	amount uint64,
 	to string,
 ) (ids.ID, error) {
-	return c.Export(ctx, user, amount, to, "DJTX")
+	return c.Export(ctx, user, amount, to, "DJT")
 }
 
 // Export sends an asset from this chain to the P/C-Chain.

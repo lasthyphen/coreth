@@ -9,8 +9,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/lasthyphen/dijetsnodego/database/versiondb"
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/database/versiondb"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 
 	"github.com/lasthyphen/coreth/plugin/evm/message"
 	syncclient "github.com/lasthyphen/coreth/sync/client"

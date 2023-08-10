@@ -7,8 +7,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 
 	"github.com/lasthyphen/coreth/core/rawdb"
 	"github.com/lasthyphen/coreth/ethdb"

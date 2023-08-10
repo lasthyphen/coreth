@@ -4,7 +4,7 @@
 package evm
 
 import (
-	"github.com/lasthyphen/dijetsnodego/database"
+	"github.com/lasthyphen/dijetsnodesgo/database"
 	"github.com/lasthyphen/coreth/ethdb"
 )
 

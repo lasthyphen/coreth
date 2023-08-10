@@ -10,12 +10,12 @@ import (
 	"math/big"
 	"net/http"
 
-	"github.com/lasthyphen/dijetsnodego/api"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils/crypto"
-	"github.com/lasthyphen/dijetsnodego/utils/formatting"
-	"github.com/lasthyphen/dijetsnodego/utils/json"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/api"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils/crypto"
+	"github.com/lasthyphen/dijetsnodesgo/utils/formatting"
+	"github.com/lasthyphen/dijetsnodesgo/utils/json"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
 	"github.com/lasthyphen/coreth/params"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -74,7 +74,7 @@ type DjtxAPI struct{ vm *VM }
 func (service *DjtxAPI) parseAssetID(assetID string) (ids.ID, error) {
 	if assetID == "" {
 		return ids.ID{}, fmt.Errorf("assetID is required")
-	} else if assetID == "DJTX" {
+	} else if assetID == "DJT" {
 		return service.vm.ctx.DJTXAssetID, nil
 	} else {
 		return ids.FromString(assetID)

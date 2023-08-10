@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils/set"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils/set"
 	"github.com/lasthyphen/coreth/core/rawdb"
 	"github.com/lasthyphen/coreth/ethdb"
 	"github.com/lasthyphen/coreth/params"

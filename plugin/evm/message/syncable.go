@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/lasthyphen/dijetsnodego/snow/engine/snowman/block"
+	"github.com/lasthyphen/dijetsnodesgo/snow/engine/snowman/block"
 )
 
 var _ block.StateSummary = &SyncSummary{}

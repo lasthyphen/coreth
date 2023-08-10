@@ -34,7 +34,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lasthyphen/dijetsnodego/utils/timer/mockable"
+	"github.com/lasthyphen/dijetsnodesgo/utils/timer/mockable"
 	"github.com/lasthyphen/coreth/accounts"
 	"github.com/lasthyphen/coreth/consensus"
 	"github.com/lasthyphen/coreth/consensus/dummy"

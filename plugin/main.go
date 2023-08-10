@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lasthyphen/dijetsnodego/utils/logging"
-	"github.com/lasthyphen/dijetsnodego/utils/ulimit"
-	"github.com/lasthyphen/dijetsnodego/vms/rpcchainvm"
+	"github.com/lasthyphen/dijetsnodesgo/utils/logging"
+	"github.com/lasthyphen/dijetsnodesgo/utils/ulimit"
+	"github.com/lasthyphen/dijetsnodesgo/vms/rpcchainvm"
 
 	"github.com/lasthyphen/coreth/plugin/evm"
 )

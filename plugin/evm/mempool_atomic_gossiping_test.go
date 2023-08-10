@@ -9,12 +9,12 @@ import (
 
 	"github.com/lasthyphen/coreth/params"
 
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils"
-	"github.com/lasthyphen/dijetsnodego/utils/crypto"
-	"github.com/lasthyphen/dijetsnodego/vms/components/djtx"
-	"github.com/lasthyphen/dijetsnodego/vms/components/chain"
-	"github.com/lasthyphen/dijetsnodego/vms/secp256k1fx"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils"
+	"github.com/lasthyphen/dijetsnodesgo/utils/crypto"
+	"github.com/lasthyphen/dijetsnodesgo/vms/components/djtx"
+	"github.com/lasthyphen/dijetsnodesgo/vms/components/chain"
+	"github.com/lasthyphen/dijetsnodesgo/vms/secp256k1fx"
 
 	"github.com/stretchr/testify/assert"
 )

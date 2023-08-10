@@ -4,10 +4,10 @@
 package message
 
 import (
-	"github.com/lasthyphen/dijetsnodego/codec"
-	"github.com/lasthyphen/dijetsnodego/codec/linearcodec"
-	"github.com/lasthyphen/dijetsnodego/utils/units"
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/codec"
+	"github.com/lasthyphen/dijetsnodesgo/codec/linearcodec"
+	"github.com/lasthyphen/dijetsnodesgo/utils/units"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 )
 
 const (

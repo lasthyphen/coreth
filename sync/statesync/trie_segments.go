@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 	"github.com/lasthyphen/coreth/core/rawdb"
 	"github.com/lasthyphen/coreth/ethdb"
 	"github.com/lasthyphen/coreth/plugin/evm/message"

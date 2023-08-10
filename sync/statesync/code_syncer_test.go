@@ -8,7 +8,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/lasthyphen/dijetsnodego/utils"
+	"github.com/lasthyphen/dijetsnodesgo/utils"
 	"github.com/lasthyphen/coreth/core/rawdb"
 	"github.com/lasthyphen/coreth/ethdb/memorydb"
 	"github.com/lasthyphen/coreth/plugin/evm/message"

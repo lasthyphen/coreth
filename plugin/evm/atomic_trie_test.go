@@ -11,14 +11,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/lasthyphen/dijetsnodego/chains/atomic"
-	"github.com/lasthyphen/dijetsnodego/database"
-	"github.com/lasthyphen/dijetsnodego/database/leveldb"
-	"github.com/lasthyphen/dijetsnodego/database/memdb"
-	"github.com/lasthyphen/dijetsnodego/database/versiondb"
-	"github.com/lasthyphen/dijetsnodego/ids"
-	"github.com/lasthyphen/dijetsnodego/utils/logging"
-	"github.com/lasthyphen/dijetsnodego/utils/wrappers"
+	"github.com/lasthyphen/dijetsnodesgo/chains/atomic"
+	"github.com/lasthyphen/dijetsnodesgo/database"
+	"github.com/lasthyphen/dijetsnodesgo/database/leveldb"
+	"github.com/lasthyphen/dijetsnodesgo/database/memdb"
+	"github.com/lasthyphen/dijetsnodesgo/database/versiondb"
+	"github.com/lasthyphen/dijetsnodesgo/ids"
+	"github.com/lasthyphen/dijetsnodesgo/utils/logging"
+	"github.com/lasthyphen/dijetsnodesgo/utils/wrappers"
 
 	"github.com/ethereum/go-ethereum/common"
 )
